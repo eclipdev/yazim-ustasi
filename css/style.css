@@ -6,36 +6,38 @@
    ========================================================================== */
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* Masa (koyu zemin) */
-  --bg: #0e0d0a;
-  --text: #fff6d8;
-  --text-2: rgba(255, 246, 216, 0.72);
-  --text-3: rgba(255, 246, 216, 0.48);
+  /* Bütün site tek bir defter sayfası: krem kâğıt, mürekkep yazı */
+  --bg: #fff6d8;
+  --text: #17140e;
+  --text-2: rgba(23, 20, 14, 0.74);
+  --text-3: rgba(23, 20, 14, 0.52);
 
-  --line: rgba(255, 246, 216, 0.13);
-  --line-strong: rgba(255, 246, 216, 0.3);
+  --line: rgba(23, 20, 14, 0.14);
+  --line-strong: rgba(23, 20, 14, 0.32);
 
-  --surface: #17150f;
-  --surface-solid: #17150f;
-  --surface-soft: rgba(255, 246, 216, 0.05);
-  --surface-soft-hover: rgba(255, 246, 216, 0.1);
-  --chip: rgba(255, 246, 216, 0.08);
+  --surface: #fffbea;
+  --surface-solid: #fffbea;
+  --surface-soft: rgba(23, 20, 14, 0.04);
+  --surface-soft-hover: rgba(23, 20, 14, 0.08);
+  --chip: rgba(23, 20, 14, 0.07);
 
+  /* Sarı yalnızca zemin/fosfor olarak kullanılır; kâğıt üstünde yazı rengi olmaz */
   --accent: #fcdf4b;
   --accent-press: #f5cf2e;
-  --accent-soft: rgba(252, 223, 75, 0.16);
+  --accent-soft: rgba(252, 223, 75, 0.4);
+  --sun-deep: #d9b300;
 
-  --good: #9bd77a;
-  --good-strong: #9bd77a;
-  --good-soft: rgba(155, 215, 122, 0.14);
-  --bad: #ff7d6e;
-  --bad-strong: #ff6b5e;
-  --bad-soft: rgba(255, 107, 94, 0.14);
+  --good: #3f6d1d;
+  --good-strong: #3f6d1d;
+  --good-soft: rgba(63, 109, 29, 0.1);
+  --bad: #c8382c;
+  --bad-strong: #c8382c;
+  --bad-soft: rgba(200, 56, 44, 0.1);
 
-  --shadow: 0 1px 0 rgba(0, 0, 0, 0.4), 0 20px 46px rgba(0, 0, 0, 0.5);
-  --shadow-soft: 0 10px 28px rgba(0, 0, 0, 0.45);
+  --shadow: 0 1px 2px rgba(23, 20, 14, 0.1), 0 12px 28px rgba(23, 20, 14, 0.1);
+  --shadow-soft: 0 8px 22px rgba(23, 20, 14, 0.12);
 
   --radius-xl: 10px;
   --radius-lg: 8px;
@@ -50,10 +52,11 @@
   --rule: rgba(23, 20, 14, 0.085);
   --margin-red: rgba(200, 56, 44, 0.5);
   --margin-x: 46px;
+  --margin-pos: calc(50% - 352px);
 
-  --field-focus: var(--accent);
-  --field-focus-bg: rgba(252, 223, 75, 0.08);
-  --btn-edge: #9c840f;
+  --field-focus: var(--ink);
+  --field-focus-bg: rgba(252, 223, 75, 0.38);
+  --btn-edge: var(--ink);
 
   --spring: cubic-bezier(0.22, 1, 0.36, 1);
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -78,46 +81,28 @@ body {
   flex-direction: column;
   font: 400 17px/1.5 var(--font);
   color: var(--text);
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(
+      90deg,
+      transparent var(--margin-pos),
+      var(--margin-red) var(--margin-pos),
+      var(--margin-red) calc(var(--margin-pos) + 2px),
+      transparent calc(var(--margin-pos) + 2px)
+    ),
+    repeating-linear-gradient(180deg, transparent 0 31px, var(--rule) 31px 32px);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
 /* ---------- Defter sayfası ----------
-   .paper içindeki her şey mürekkep renginde; değişkenler burada yeniden
-   tanımlandığı için alanlar, düğmeler ve ipuçları sayfaya uyum sağlar. */
+   Sayfanın kendisi defter (body zemini). Giriş, soru ve sonuç bölümleri
+   ayrı kart değil, doğrudan satırların üstüne yazılmış içeriktir. */
 
 .paper {
-  --text: var(--ink);
-  --text-2: rgba(23, 20, 14, 0.72);
-  --text-3: rgba(23, 20, 14, 0.5);
-  --line: rgba(23, 20, 14, 0.14);
-  --line-strong: rgba(23, 20, 14, 0.32);
-  --surface-soft: rgba(23, 20, 14, 0.04);
-  --surface-soft-hover: rgba(23, 20, 14, 0.08);
-  --chip: rgba(23, 20, 14, 0.07);
-  --good: #3f6d1d;
-  --bad: var(--pen-red);
-  --field-focus: var(--ink);
-  --field-focus-bg: rgba(252, 223, 75, 0.38);
-  --btn-edge: var(--ink);
-
   position: relative;
-  color: var(--ink);
-  background-color: var(--paper);
-  background-image:
-    linear-gradient(
-      90deg,
-      transparent var(--margin-x),
-      var(--margin-red) var(--margin-x),
-      var(--margin-red) calc(var(--margin-x) + 2px),
-      transparent calc(var(--margin-x) + 2px)
-    ),
-    repeating-linear-gradient(180deg, transparent 0 33px, var(--rule) 33px 34px);
-  border-radius: 3px;
-  box-shadow: var(--shadow);
-  padding: 30px 28px 30px calc(var(--margin-x) + 22px);
+  padding: 0;
 }
 
 /* ---------- Üst çubuk ---------- */
@@ -132,7 +117,7 @@ body {
   gap: 16px;
   padding: 12px max(20px, calc((100vw - 760px) / 2));
   background: var(--bg);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 3px double var(--margin-red);
 }
 
 .brand {
@@ -260,10 +245,13 @@ main {
 }
 
 .display mark {
-  background: none;
-  color: var(--accent);
+  color: inherit;
   font-style: italic;
   font-weight: 600;
+  padding: 0 0.06em;
+  background: linear-gradient(transparent 52%, var(--accent) 52%, var(--accent) 88%, transparent 88%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 .lead {
@@ -498,7 +486,7 @@ h2 {
 }
 
 .board-list li:first-child .board-rank {
-  color: var(--accent);
+  color: var(--pen-red);
 }
 
 .board-name {
@@ -564,7 +552,7 @@ h2 {
 .progress-fill {
   height: 100%;
   width: 0%;
-  background: var(--accent);
+  background: var(--ink);
   transition: width 0.5s var(--ease);
 }
 
@@ -785,7 +773,7 @@ h2 {
 .feedback-scrim {
   position: absolute;
   inset: 0;
-  background: rgba(8, 7, 5, 0.6);
+  background: rgba(23, 20, 14, 0.32);
   opacity: 0;
   transition: opacity 0.25s var(--ease);
 }
@@ -795,10 +783,10 @@ h2 {
   margin: 0;
   width: min(340px, 84vw);
   padding: 12px 12px 16px;
-  border-radius: 3px;
-  background: var(--paper);
+  border-radius: 2px;
+  background: var(--sun);
   color: var(--ink);
-  box-shadow: var(--shadow);
+  box-shadow: 0 2px 3px rgba(23, 20, 14, 0.15), 0 16px 32px rgba(23, 20, 14, 0.2);
   transform: rotate(-2deg) translateY(12px);
   opacity: 0;
   transition: transform 0.35s var(--spring), opacity 0.25s var(--ease);
@@ -961,9 +949,9 @@ h2 {
 }
 
 .card.paper {
-  background-color: var(--paper);
+  background: none;
   border: none;
-  border-radius: 3px;
+  border-radius: 0;
 }
 
 /* ---------- Alt bilgi ---------- */
@@ -1046,12 +1034,15 @@ h2 {
 }
 
 .prose h3 {
+  display: inline-block;
   margin: 28px 0 8px;
+  padding: 0 4px;
   font-family: var(--serif);
   font-style: italic;
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--text);
+  background: linear-gradient(transparent 55%, var(--accent) 55%, var(--accent) 92%, transparent 92%);
 }
 
 .prose p {
@@ -1072,25 +1063,31 @@ h2 {
 }
 
 .prose li::marker {
-  color: var(--accent);
+  color: var(--pen-red);
 }
 
 .prose a {
-  color: var(--accent);
+  color: var(--text);
+  font-weight: 700;
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration-color: var(--sun-deep);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 3px;
 }
 
 .prose strong {
   color: var(--text);
 }
 
+/* Logo siyah zeminli: kâğıda yapıştırılmış etiket gibi durur */
 .about-logo {
   display: block;
   height: 88px;
   width: auto;
-  margin: 4px 0 16px;
-  mix-blend-mode: lighten;
+  margin: 8px 0 18px;
+  border-radius: 6px;
+  transform: rotate(-3deg);
+  box-shadow: 0 2px 3px rgba(23, 20, 14, 0.18), 0 8px 18px rgba(23, 20, 14, 0.14);
 }
 
 /* ---------- Yardımcılar ---------- */
@@ -1100,12 +1097,8 @@ h2 {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ink);
   outline-offset: 3px;
-}
-
-.paper :focus-visible {
-  outline-color: var(--ink);
 }
 
 /* ---------- Küçük ekran ---------- */
@@ -1120,17 +1113,29 @@ h2 {
     padding-right: max(16px, env(safe-area-inset-right));
   }
 
-  .paper {
-    --margin-x: 26px;
-    padding: 24px 18px 24px calc(var(--margin-x) + 16px);
-  }
-
   .result-actions .btn {
     flex: 1 1 140px;
   }
 
   .feedback-card img {
     max-height: 46vh;
+  }
+}
+
+/* Dar ekranda kenar çizgisi sola yaslanır, yazı çizginin sağında başlar */
+@media (max-width: 760px) {
+  :root {
+    --margin-pos: 14px;
+  }
+
+  main,
+  .legal-main,
+  .admin-main {
+    padding-left: 32px !important;
+  }
+
+  .footer-inner {
+    padding-left: 32px;
   }
 }
 

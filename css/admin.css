@@ -107,8 +107,11 @@
 }
 
 .admin-card .sub a {
-  color: var(--accent);
-  text-decoration: none;
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--sun-deep);
+  text-decoration-thickness: 2px;
 }
 
 .admin-card .sub a:hover {
@@ -256,7 +259,7 @@ textarea.code {
 
 textarea.code:focus {
   background: var(--surface-solid);
-  border-color: var(--accent);
+  border-color: var(--ink);
   box-shadow: 0 0 0 4px var(--accent-soft);
 }
 

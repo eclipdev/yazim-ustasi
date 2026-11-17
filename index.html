@@ -8,12 +8,12 @@
       content="default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://*.googleapis.com https://*.firebaseapp.com https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebaseio.com; object-src 'none'; base-uri 'self'; form-action 'self'"
     />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <title>Yazım Ustası — TDK Yazım Kuralları</title>
+    <title>Yazım Ustası — Bir boşluk, bir puan</title>
     <meta
       name="description"
-      content="TDK yazım kuralları üzerine soru çözerek puan kazandığın, sade ve akıcı bir alıştırma uygulaması."
+      content="İki yazımdan doğrusunu seç, kuralı öğren, puanını her gün biriktir. TDK yazım kurallarıyla alıştırma."
     />
-    <meta name="theme-color" content="#0e0d0a" />
+    <meta name="theme-color" content="#fff6d8" />
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="css/fonts.css" />
     <link rel="stylesheet" href="css/style.css" />
@@ -59,11 +59,11 @@
       <!-- Giriş -->
       <section class="view" id="view-login" aria-labelledby="loginTitle">
         <div class="hero">
-          <p class="eyebrow">Türk Dil Kurumu yazım kuralları</p>
-          <h1 class="display" id="loginTitle"><mark>Doğru</mark> yaz,<br />puan kazan.</h1>
+          <p class="eyebrow">TDK yazım kılavuzuna göre</p>
+          <h1 class="display" id="loginTitle">Bir <mark>boşluk</mark>,<br />bir puan.</h1>
           <p class="lead">
-            Adınla ve okul numaranla giriş yap. Her doğru cevap 10 puan. Yanlışta doğrusunu
-            öğren, doğruda bir sonraki soruya geç.
+            “Her şey” mi, “herşey” mi? İki yazımdan doğrusunu seç. Her doğru 10 puan;
+            yanlışta kuralı hemen öğren. Puanın her gün birikir, sıralamada yerini al.
           </p>
         </div>
 
@@ -103,7 +103,7 @@
               <a href="yasal.html#haklar" target="_blank" rel="noopener noreferrer">Haklarım</a>
             </span>
           </label>
-          <button class="btn primary block" type="submit">Başla</button>
+          <button class="btn primary block" type="submit">Yazmaya başla</button>
           <p class="hint" id="loginHint" role="status"></p>
         </form>
 
@@ -160,7 +160,7 @@
       <!-- Sonuç -->
       <section class="view" id="view-result" aria-labelledby="resMsg" hidden>
         <div class="card paper result-card">
-          <p class="eyebrow">Tur tamamlandı</p>
+          <p class="eyebrow">Sayfa tamam</p>
           <p class="result-score"><span id="resScore">0</span><small>puan</small></p>
           <p class="lead" id="resMsg"></p>
           <p class="round-totals" id="resTotals" aria-live="polite"></p>

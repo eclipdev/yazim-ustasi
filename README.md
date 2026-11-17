@@ -1,6 +1,6 @@
 # Yazım Ustası
 
-TDK yazım kuralları üzerine kurulu, Apple esintili sade bir soru-cevap sitesi.
+TDK yazım kuralları üzerine kurulu, çizgili defter görünümlü bir soru-cevap sitesi.
 Öğrenci adı ve okul numarasıyla giriş yapar, her turda rastgele sorular çözer,
 doğru cevaplar kadar puan toplar.
 
@@ -19,9 +19,9 @@ doğru cevaplar kadar puan toplar.
   İletişim bağlantıları (`yasal.html`).
 - **Firebase (isteğe bağlı):** Yapılandırılırsa her tur sonucu Firestore'a yazılır;
   yapılandırılmazsa site localStorage ile çalışır.
-- **Apple tarzı arayüz:** Sistem fontu, translüzen yüzeyler, yumuşak yaylar, koyu/açık
-  tema, azaltılmış hareket ve azaltılmış şeffaflık desteği, mobil için `dvh` ve
-  dokunma geri bildirimi.
+- **Defter arayüzü:** Bütün site krem renkli çizgili bir defter sayfası; doğru cevap
+  sarı fosforla, yanlış cevap kırmızı kalemle işaretlenir. Fraunces ve Atkinson
+  Hyperlegible yazı tipleri siteye gömülüdür; azaltılmış hareket desteği vardır.
 
 ## Kurulum
 

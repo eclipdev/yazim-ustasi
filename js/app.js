@@ -264,8 +264,8 @@ function showExplanation(isCorrect, q) {
   const verdict = $("#verdict");
 
   verdict.textContent = isCorrect
-    ? "Doğru! +" + (Number(settings.pointsPerCorrect) || 10) + " puan."
-    : "Yanlış — doğrusu: " + q.answer;
+    ? "Tam isabet. +" + (Number(settings.pointsPerCorrect) || 10) + " puan."
+    : "Kırmızı kalem. Doğrusu: " + q.answer;
   verdict.className = "verdict " + (isCorrect ? "good" : "bad");
   $("#explainText").textContent = q.explanation || "";
   block.hidden = false;
@@ -298,8 +298,8 @@ function showFeedback(isCorrect) {
   feedbackImg.src = src;
 
   feedbackCaption.textContent = isCorrect
-    ? "Doğru!"
-    : "Yanlış — doğrusunu öğren.";
+    ? "Tam isabet!"
+    : "Kırmızı kalem!";
 
   feedback.hidden = false;
   requestAnimationFrame(() => {
@@ -335,10 +335,10 @@ function finishRound() {
   $("#resWrong").textContent = String(wrong);
   $("#resPct").textContent = `${pct}%`;
 
-  let msg = "Tekrar denemeye değer — kurallar aklında kaldıkça hızlanacaksın.";
-  if (pct >= 90) msg = "Kusursuz! TDK yazım kurallarına hâkimsin.";
-  else if (pct >= 70) msg = "Çok iyi. Birkaç ayrıntı daha ve tam isabet.";
-  else if (pct >= 50) msg = "İyi gidiyorsun. Açıklamaları tekrar oku, fark hemen görünecek.";
+  let msg = "Kırmızı kalem bugün biraz yoruldu. Bir sayfa daha, kurallar oturacak.";
+  if (pct >= 90) msg = "Kalemine sağlık. Bu sayfada düzeltecek tek harf yok.";
+  else if (pct >= 70) msg = "Çok iyi. Birkaç boşluk daha yerine otursun, tam puan senin.";
+  else if (pct >= 50) msg = "Yolun yarısı geçti. Açıklamaları bir kez daha oku, fark hemen görünür.";
 
   $("#resMsg").textContent = msg;
   $("#scoreChip").hidden = false;
@@ -466,7 +466,7 @@ async function loadBoard() {
   if (!top.length) {
     const li = document.createElement("li");
     li.className = "board-empty";
-    li.textContent = "Henüz puan yok. İlk turu sen tamamla!";
+    li.textContent = "Sayfa boş. İlk satırı sen yaz.";
     list.append(li);
     return;
   }
