@@ -1224,3 +1224,86 @@ h2 {
   border-radius: 4px;
   object-fit: cover;
 }
+
+/* ---------- Takım seçimi ve sıralamadaki fotoğraf ---------- */
+
+.team-pick {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.team-pick legend {
+  padding: 0;
+  margin-bottom: 8px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.team-opt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 2px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.35);
+  font-family: var(--serif);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease);
+}
+
+.team-opt input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.team-opt img {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--ink);
+}
+
+.team-opt:has(input:checked) {
+  border-color: var(--ink);
+  background: rgba(252, 223, 75, 0.45);
+}
+
+.team-opt:has(input:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+@media (max-width: 400px) {
+  .team-pick {
+    grid-template-columns: 1fr;
+  }
+}
+
+.board-who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.board-avatar {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--ink);
+}

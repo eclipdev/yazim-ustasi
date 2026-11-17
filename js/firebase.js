@@ -203,9 +203,9 @@ export async function fetchPlayer(uid) {
 
 // Profili oluşturur ya da günceller. Bayrak (flagged) bir kez açıldıysa
 // yalnızca yönetici kaldırabilir; kurallar bunu zorlar.
-export async function savePlayerProfile(uid, { name, className, schoolNo, nameFlagged }) {
+export async function savePlayerProfile(uid, { name, className, schoolNo, team, nameFlagged }) {
   const handle = await getDb();
-  if (!handle) return false;
+  if (!handle) return { ok: false, code: "firebase-yok" };
   try {
     const { fs, db } = handle;
     const ref = fs.doc(db, "players", uid);
@@ -217,6 +217,7 @@ export async function savePlayerProfile(uid, { name, className, schoolNo, nameFl
       uid,
       name,
       className,
+      team,
       flagged: previouslyFlagged || !!nameFlagged,
       updatedAt: fs.serverTimestamp(),
     };
@@ -231,10 +232,10 @@ export async function savePlayerProfile(uid, { name, className, schoolNo, nameFl
       { schoolNo: String(schoolNo), updatedAt: fs.serverTimestamp() },
       { merge: true }
     );
-    return true;
+    return { ok: true };
   } catch (err) {
     console.warn("Profil kaydedilemedi:", err);
-    return false;
+    return { ok: false, code: String(err?.code || err?.message || "bilinmeyen-hata") };
   }
 }
 
@@ -303,6 +304,7 @@ function mapPlayer(d) {
     uid: String(data.uid ?? d.id),
     name: String(data.name ?? ""),
     className: String(data.className ?? ""),
+    team: String(data.team ?? ""),
     total: Number(data.total) || 0,
     days: data.days || {},
     banned: data.banned === true,

@@ -49,13 +49,15 @@ service cloud.firestore {
         && request.auth.uid == uid
         && request.resource.data.get('banned', false) == false
         && request.resource.data.name is string
-        && request.resource.data.className is string;
+        && request.resource.data.className is string
+        && request.resource.data.team in ['gurbuz', 'suleyman'];
 
       allow update: if (
           request.auth != null
           && request.auth.uid == uid
           && resource.data.get('banned', false) == false
           && request.resource.data.get('banned', false) == resource.data.get('banned', false)
+          && request.resource.data.get('team', '') in ['gurbuz', 'suleyman']
           && (request.resource.data.get('flagged', false) == resource.data.get('flagged', false)
               || request.resource.data.get('flagged', false) == true)
         ) || (
@@ -104,6 +106,7 @@ bir tur çöz. Puan `players` koleksiyonunda belirmeli.
 | `uid` | Google hesabının kimliği |
 | `name` | Ad soyad |
 | `className` | Sınıf, örneğin `11-A` |
+| `team` | `gurbuz` (Gürbüz Team) ya da `suleyman` (Süleyman Team) |
 | `total` | Toplam puan |
 | `days` | Gün gün puan: `days.YYYY-MM-DD` |
 | `flagged` | `true` ise sıralamada gizlenir (isim filtresi veya yönetici) |

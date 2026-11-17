@@ -14,6 +14,7 @@ import {
 } from "./firebase.js";
 import { saveRound, localProgress, todayKey } from "./progress.js";
 import { nameIsBad } from "./moderation.js";
+import { TEAMS } from "./teams.js";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 
@@ -80,6 +81,12 @@ function setFieldsEnabled(enabled) {
   $("#profileFields").disabled = !enabled;
 }
 
+function setTeam(value) {
+  document.querySelectorAll('input[name="team"]').forEach((input) => {
+    input.checked = input.value === value;
+  });
+}
+
 async function refreshAuthUi() {
   const btn = $("#googleBtn");
   const hint = $("#loginHint");
@@ -115,6 +122,7 @@ async function refreshAuthUi() {
   if (player) {
     $("#playerName").value = player.name || user.displayName || "";
     $("#playerClass").value = player.className || "";
+    setTeam(player.team || "");
     $("#playerNo").value = await fetchOwnSchoolNo(user.uid);
   } else {
     $("#playerName").value = user.displayName || "";
@@ -181,6 +189,13 @@ async function validateLogin(event) {
     noInput.focus();
     return;
   }
+  const team = document.querySelector('input[name="team"]:checked')?.value || "";
+  if (!TEAMS[team]) {
+    hint.textContent = "Takımını seç: Gürbüz Team ya da Süleyman Team.";
+    hint.classList.add("error");
+    return;
+  }
+
   const consent = $("#consentBox");
   if (consent && !consent.checked) {
     hint.textContent = "Devam etmek için gizlilik iznini işaretle.";
@@ -197,15 +212,23 @@ async function validateLogin(event) {
     name,
     className,
     schoolNo: no,
+    team,
     nameFlagged: flagged,
   });
 
-  state.profile = { uid: state.user.uid, name, className, schoolNo: no };
-  store.set(KEYS.profile, { name, className, schoolNo: no });
+  if (!saved.ok) {
+    hint.textContent =
+      `Hesap kaydedilemedi (${saved.code}). Sayfayı tam yenileyip (Ctrl+F5) tekrar dene; ` +
+      "sürerse bu kodu yöneticine ilet.";
+    hint.classList.add("error");
+    return;
+  }
+
+  state.profile = { uid: state.user.uid, name, className, schoolNo: no, team };
+  store.set(KEYS.profile, { name, className, schoolNo: no, team });
   hint.textContent = "";
 
   if (flagged) toast("Bu isim sıralamada görünmeyecek; yönetici inceleyecek.", 3200);
-  else if (!saved) toast("Sunucuya kaydedilemedi; puanlar bu tarayıcıda tutulur.", 3200);
 
   startRound();
 }
@@ -519,15 +542,32 @@ async function loadBoard() {
     rank.textContent = String(index + 1);
 
     const who = document.createElement("div");
-    who.style.minWidth = "0";
+    who.className = "board-who";
+    const team = TEAMS[row.team];
+    if (team) {
+      const avatar = document.createElement("img");
+      avatar.className = "board-avatar";
+      avatar.src = team.img;
+      avatar.alt = team.name;
+      avatar.title = team.name;
+      avatar.width = 36;
+      avatar.height = 36;
+      who.append(avatar);
+    }
+    const text = document.createElement("div");
+    text.style.minWidth = "0";
     const name = document.createElement("span");
     name.className = "board-name";
     name.textContent = maskName(row.name);
     const sub = document.createElement("span");
     sub.className = "board-sub";
-    const cls = row.className ? `${row.className} · ` : "";
-    sub.textContent = `${cls}Bugün ${Number(row.days?.[day]?.score) || 0} puan`;
-    who.append(name, sub);
+    const parts = [];
+    if (team) parts.push(team.name);
+    if (row.className) parts.push(row.className);
+    parts.push(`Bugün ${Number(row.days?.[day]?.score) || 0} puan`);
+    sub.textContent = parts.join(" · ");
+    text.append(name, sub);
+    who.append(text);
 
     const pts = document.createElement("span");
     pts.className = "board-pts";

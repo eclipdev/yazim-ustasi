@@ -8,6 +8,7 @@ import {
 } from "./data.js";
 import { store, KEYS } from "./store.js";
 import { todayKey } from "./progress.js";
+import { TEAMS } from "./teams.js";
 import {
   testFirebase,
   firebaseStatus,
@@ -900,7 +901,7 @@ async function loadPlayers() {
   table.className = "results";
   const head = document.createElement("thead");
   const headRow = document.createElement("tr");
-  ["Ad Soyad", "Sınıf", "No", "Toplam", "Durum", "İşlem"].forEach((label) => {
+  ["Ad Soyad", "Sınıf", "Takım", "No", "Toplam", "Durum", "İşlem"].forEach((label) => {
     const th = document.createElement("th");
     th.textContent = label;
     headRow.append(th);
@@ -912,10 +913,10 @@ async function loadPlayers() {
   rows.forEach((row) => {
     const tr = document.createElement("tr");
 
-    const cells = [row.name || "—", row.className || "—", row.schoolNo || "—", String(row.total)];
+    const cells = [row.name || "—", row.className || "—", TEAMS[row.team]?.name || "—", row.schoolNo || "—", String(row.total)];
     cells.forEach((value, i) => {
       const td = document.createElement("td");
-      if (i === 3) td.className = "num";
+      if (i === 4) td.className = "num";
       td.textContent = value;
       tr.append(td);
     });
