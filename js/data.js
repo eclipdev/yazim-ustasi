@@ -455,4 +455,4 @@ export const defaultSettings = {
   pointsPerCorrect: 10,
 };
 
-export const defaultAdminPassword = "tdk2026";
+export const defaultAdminPassword = "kaptan";

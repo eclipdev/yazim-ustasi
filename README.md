@@ -36,7 +36,7 @@ tıklayarak da açabilirsin; ancak `type="module"` scriptleri için sunucu öner
 ## Yönetim paneli
 
 - Adres: `admin.html`
-- İlk şifre: **tdk2026** — panelin "Ayarlar" sekmesinden değiştirebilirsin.
+- İlk şifre: **kaptan** — panelin "Ayarlar" sekmesinden değiştirebilirsin.
 - Not: Bu şifre yalnızca tarayıcıda tutulur ve gerçek bir kimlik doğrulama değildir;
   site halka açıksa paneli gizli tutmak için yeterli değildir. Panelde hassas veri
   bulundurma.

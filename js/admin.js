@@ -83,7 +83,7 @@ function bindGate() {
       hint.textContent = "";
       unlockPanel();
     } else {
-      hint.textContent = "Şifre yanlış. İlk şifre: tdk2026";
+      hint.textContent = "Şifre yanlış. İlk şifre: kaptan";
       hint.classList.add("error");
       input.setAttribute("aria-invalid", "true");
       input.select();
