@@ -385,14 +385,26 @@ const feedbackCard = $("#feedbackCard");
 const feedbackImg = $("#feedbackImg");
 const feedbackCaption = $("#feedbackCaption");
 
+// Eski varsayılan görseller tarayıcılarda kayıtlı kalmış olabilir; yenisine çevrilir.
+const LEGACY_IMAGES = {
+  "assets/correct.svg": defaultSettings.correctImage,
+  "assets/wrong.svg": defaultSettings.wrongImage,
+};
+
+function upgradeImage(src) {
+  return LEGACY_IMAGES[src] || src;
+}
+
 // Doğru ya da yanlış için listedeki görsellerden rastgele biri seçilir.
 function pickImage(isCorrect) {
   const list = isCorrect ? settings.correctImages : settings.wrongImages;
-  const pool = Array.isArray(list) ? list.filter(Boolean) : [];
+  const pool = Array.isArray(list) ? list.filter(Boolean).map(upgradeImage) : [];
   if (pool.length) return pool[Math.floor(Math.random() * pool.length)];
-  return isCorrect
-    ? settings.correctImage || defaultSettings.correctImage
-    : settings.wrongImage || defaultSettings.wrongImage;
+  return upgradeImage(
+    isCorrect
+      ? settings.correctImage || defaultSettings.correctImage
+      : settings.wrongImage || defaultSettings.wrongImage
+  );
 }
 
 function showFeedback(isCorrect) {

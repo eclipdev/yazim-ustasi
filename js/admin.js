@@ -71,14 +71,20 @@ function applyTheme(theme, announce = false) {
 // ---------- Durum ----------
 
 let settings = { ...defaultSettings, ...(store.get(KEYS.settings, {}) || {}) };
-function imageList(list, single) {
-  if (Array.isArray(list) && list.length) return [...list];
-  return [single || defaultSettings.correctImage];
+// Eski varsayılan görseller (svg) yeni varsayılanlara çevrilir.
+const LEGACY_IMAGES = {
+  "assets/correct.svg": defaultSettings.correctImage,
+  "assets/wrong.svg": defaultSettings.wrongImage,
+};
+
+function imageList(list, single, fallback) {
+  const items = Array.isArray(list) && list.length ? list : [single || fallback];
+  return items.map((src) => LEGACY_IMAGES[src] || src);
 }
 
 const pending = {
-  correctList: imageList(settings.correctImages, settings.correctImage),
-  wrongList: imageList(settings.wrongImages, settings.wrongImage),
+  correctList: imageList(settings.correctImages, settings.correctImage, defaultSettings.correctImage),
+  wrongList: imageList(settings.wrongImages, settings.wrongImage, defaultSettings.wrongImage),
 };
 
 // Yeni görseller önce büyük dosyalar yüzünden taşmasın diye toplam boyut sınırı.
@@ -320,10 +326,10 @@ async function loadSharedVisuals() {
   const shared = await fetchVisuals();
   if (!shared) return;
   if (Array.isArray(shared.correctImages) && shared.correctImages.length) {
-    pending.correctList = [...shared.correctImages];
+    pending.correctList = imageList(shared.correctImages, null, defaultSettings.correctImage);
   }
   if (Array.isArray(shared.wrongImages) && shared.wrongImages.length) {
-    pending.wrongList = [...shared.wrongImages];
+    pending.wrongList = imageList(shared.wrongImages, null, defaultSettings.wrongImage);
   }
   renderList("correct");
   renderList("wrong");

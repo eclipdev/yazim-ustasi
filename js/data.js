@@ -449,8 +449,8 @@ export const defaultQuestions = [
 ];
 
 export const defaultSettings = {
-  correctImage: "assets/correct.svg",
-  wrongImage: "assets/wrong.svg",
+  correctImage: "assets/default-correct.webp",
+  wrongImage: "assets/default-wrong.webp",
   roundSize: 12,
   pointsPerCorrect: 10,
 };
