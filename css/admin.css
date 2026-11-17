@@ -420,3 +420,55 @@ table.results td.num {
   color: var(--ink);
   box-shadow: none;
 }
+
+/* Görsel listeleri */
+.visual-set {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 26px;
+}
+.thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+}
+.thumbs:empty::before {
+  content: "Henüz görsel yok. Varsayılan kullanılır.";
+  grid-column: 1 / -1;
+  color: var(--text-3);
+  font-size: 0.875rem;
+}
+.thumb {
+  position: relative;
+  margin: 0;
+}
+.thumb img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-soft);
+}
+.thumb button {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+.add-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.add-row input {
+  flex: 1;
+  min-width: 0;
+}

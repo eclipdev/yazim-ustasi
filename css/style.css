@@ -1214,3 +1214,13 @@ h2 {
     width: min(960px, 100%);
   }
 }
+
+.eclip-mini {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  margin-right: 8px;
+  vertical-align: middle;
+  border-radius: 4px;
+  object-fit: cover;
+}

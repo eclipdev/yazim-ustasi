@@ -68,10 +68,18 @@ function applyTheme(theme, announce = false) {
 // ---------- Durum ----------
 
 let settings = { ...defaultSettings, ...(store.get(KEYS.settings, {}) || {}) };
+function imageList(list, single) {
+  if (Array.isArray(list) && list.length) return [...list];
+  return [single || defaultSettings.correctImage];
+}
+
 const pending = {
-  correctImage: settings.correctImage || defaultSettings.correctImage,
-  wrongImage: settings.wrongImage || defaultSettings.wrongImage,
+  correctList: imageList(settings.correctImages, settings.correctImage),
+  wrongList: imageList(settings.wrongImages, settings.wrongImage),
 };
+
+// Yeni görseller önce büyük dosyalar yüzünden taşmasın diye toplam boyut sınırı.
+const IMAGE_TOTAL_LIMIT = 4 * 1024 * 1024;
 
 // ---------- Şifre kapısı ----------
 
@@ -217,88 +225,123 @@ function bindTabs() {
 
 // ---------- Görseller ----------
 
-function previewImage(imgEl, src) {
-  imgEl.onerror = () => {
-    imgEl.onerror = null;
-    imgEl.src = imgEl.id === "previewCorrect" ? defaultSettings.correctImage : defaultSettings.wrongImage;
-  };
-  imgEl.src = src;
+const SIDES = {
+  correct: { listKey: "correctList", listEl: "#correctList", urlEl: "#correctUrl", fileEl: "#correctFile", addEl: "#correctAddUrl", resetEl: "#correctReset", fallback: defaultSettings.correctImage, label: "Doğru" },
+  wrong: { listKey: "wrongList", listEl: "#wrongList", urlEl: "#wrongUrl", fileEl: "#wrongFile", addEl: "#wrongAddUrl", resetEl: "#wrongReset", fallback: defaultSettings.wrongImage, label: "Yanlış" },
+};
+
+function totalPendingBytes() {
+  return [...pending.correctList, ...pending.wrongList].reduce((sum, src) => sum + src.length, 0);
 }
 
-function updatePreviews() {
-  previewImage($("#previewCorrect"), pending.correctImage);
-  previewImage($("#previewWrong"), pending.wrongImage);
+function renderList(side) {
+  const cfg = SIDES[side];
+  const wrap = $(cfg.listEl);
+  wrap.textContent = "";
+  pending[cfg.listKey].forEach((src, index) => {
+    const figure = document.createElement("figure");
+    figure.className = "thumb";
+    const img = document.createElement("img");
+    img.alt = `${cfg.label} görseli ${index + 1}`;
+    img.src = src;
+    img.onerror = () => { img.src = cfg.fallback; };
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "✕";
+    remove.setAttribute("aria-label", `${index + 1}. görseli kaldır`);
+    remove.addEventListener("click", () => {
+      pending[cfg.listKey].splice(index, 1);
+      renderList(side);
+    });
+    figure.append(img, remove);
+    wrap.append(figure);
+  });
 }
 
-function readImageFile(file, targetKey, inputEl) {
-  if (!file) return;
-  if (!file.type.startsWith("image/")) {
-    toast("Lütfen bir görsel dosyası seç.");
-    return;
-  }
-  if (file.size > IMAGE_FILE_LIMIT) {
-    toast("Görsel 1,5 MB'tan büyük. Daha küçük bir dosya seç.");
-    inputEl.value = "";
-    return;
-  }
+function addToList(side, src) {
+  const cfg = SIDES[side];
+  pending[cfg.listKey].push(src);
+  renderList(side);
+}
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    pending[targetKey] = String(reader.result);
-    updatePreviews();
-    setStatus($("#imageStatus"), `“${file.name}” yüklendi. Kaydetmeyi unutma.`, "ok");
-  };
-  reader.onerror = () => toast("Dosya okunamadı.");
-  reader.readAsDataURL(file);
+function readImageFile(file) {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith("image/")) {
+      reject(new Error("Lütfen bir görsel dosyası seç."));
+      return;
+    }
+    if (file.size > IMAGE_FILE_LIMIT) {
+      reject(new Error(`“${file.name}” 1,5 MB'tan büyük.`));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Dosya okunamadı."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function bindSide(side) {
+  const cfg = SIDES[side];
+
+  renderList(side);
+
+  $(cfg.addEl).addEventListener("click", () => {
+    const value = $(cfg.urlEl).value.trim();
+    if (!value) {
+      toast("Önce bir görsel bağlantısı yapıştır.");
+      return;
+    }
+    addToList(side, value);
+    $(cfg.urlEl).value = "";
+    setStatus($("#imageStatus"), "Bağlantı listeye eklendi. Kaydetmeyi unutma.", "ok");
+  });
+
+  $(cfg.fileEl).addEventListener("change", async (event) => {
+    const files = [...(event.target.files || [])];
+    event.target.value = "";
+    let added = 0;
+    for (const file of files) {
+      try {
+        const src = await readImageFile(file);
+        if (totalPendingBytes() + src.length > IMAGE_TOTAL_LIMIT) {
+          toast("Toplam görsel boyutu çok büyük. Bazı dosyalar eklenmedi.", 3000);
+          break;
+        }
+        pending[cfg.listKey].push(src);
+        added += 1;
+      } catch (err) {
+        toast(err.message);
+      }
+    }
+    renderList(side);
+    if (added) setStatus($("#imageStatus"), `${added} görsel eklendi. Kaydetmeyi unutma.`, "ok");
+  });
+
+  $(cfg.resetEl).addEventListener("click", () => {
+    pending[cfg.listKey] = [cfg.fallback];
+    renderList(side);
+    setStatus($("#imageStatus"), `${cfg.label} görselleri varsayılana döndü. Kaydetmeyi unutma.`, "ok");
+  });
 }
 
 function bindVisuals() {
-  $("#correctUrl").value = settings.correctImage?.startsWith("data:") ? "" : settings.correctImage || "";
-  $("#wrongUrl").value = settings.wrongImage?.startsWith("data:") ? "" : settings.wrongImage || "";
-  updatePreviews();
-
-  $("#correctUrl").addEventListener("input", (event) => {
-    const value = event.target.value.trim();
-    pending.correctImage = value || defaultSettings.correctImage;
-    previewImage($("#previewCorrect"), pending.correctImage);
-  });
-
-  $("#wrongUrl").addEventListener("input", (event) => {
-    const value = event.target.value.trim();
-    pending.wrongImage = value || defaultSettings.wrongImage;
-    previewImage($("#previewWrong"), pending.wrongImage);
-  });
-
-  $("#correctFile").addEventListener("change", (event) =>
-    readImageFile(event.target.files?.[0], "correctImage", event.target)
-  );
-  $("#wrongFile").addEventListener("change", (event) =>
-    readImageFile(event.target.files?.[0], "wrongImage", event.target)
-  );
-
-  $("#correctReset").addEventListener("click", () => {
-    pending.correctImage = defaultSettings.correctImage;
-    $("#correctUrl").value = defaultSettings.correctImage;
-    $("#correctFile").value = "";
-    previewImage($("#previewCorrect"), pending.correctImage);
-  });
-
-  $("#wrongReset").addEventListener("click", () => {
-    pending.wrongImage = defaultSettings.wrongImage;
-    $("#wrongUrl").value = defaultSettings.wrongImage;
-    $("#wrongFile").value = "";
-    previewImage($("#previewWrong"), pending.wrongImage);
-  });
+  bindSide("correct");
+  bindSide("wrong");
 
   $("#saveVisuals").addEventListener("click", () => {
+    const correctImages = [...pending.correctList];
+    const wrongImages = [...pending.wrongList];
     settings = {
       ...settings,
-      correctImage: pending.correctImage,
-      wrongImage: pending.wrongImage,
+      correctImages,
+      wrongImages,
+      correctImage: correctImages[0] || defaultSettings.correctImage,
+      wrongImage: wrongImages[0] || defaultSettings.wrongImage,
     };
     const ok = store.set(KEYS.settings, settings);
     if (!ok) {
-      toast("Kaydedilemedi — görsel çok büyük olabilir. Daha küçük bir dosya dene.");
+      toast("Kaydedilemedi — görseller çok büyük. Bazılarını kaldırıp tekrar dene.", 3200);
       return;
     }
     setStatus($("#imageStatus"), "Görseller kaydedildi.", "ok");

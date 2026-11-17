@@ -80,31 +80,31 @@
               buradan belirle. Bir bağlantı yapıştırabilir ya da cihazından dosya yükleyebilirsin.
             </p>
 
-            <div class="grid-2">
-              <div class="image-field">
-                <strong>Doğru cevap görseli</strong>
-                <div class="preview"><img id="previewCorrect" alt="Doğru cevap görseli önizlemesi" /></div>
-                <label class="field">
-                  <span>Görsel bağlantısı (URL)</span>
-                  <input id="correctUrl" type="url" placeholder="https://... veya assets/correct.svg" />
-                </label>
-                <div class="file-row">
-                  <input type="file" id="correctFile" accept="image/*" aria-label="Doğru cevap görseli yükle" />
-                  <button class="btn ghost small" type="button" id="correctReset">Varsayılan</button>
-                </div>
+            <div class="visual-set">
+              <strong>Doğru cevap görselleri</strong>
+              <p class="sub" style="margin: 4px 0 10px">Her doğru cevapta bu listeden rastgele biri çıkar. GIF de eklenebilir.</p>
+              <div class="thumbs" id="correctList"></div>
+              <div class="add-row">
+                <input id="correctUrl" type="url" placeholder="Görsel bağlantısı (URL) yapıştır" aria-label="Doğru cevap görseli bağlantısı" />
+                <button class="btn ghost small" type="button" id="correctAddUrl">Ekle</button>
               </div>
+              <div class="file-row">
+                <input type="file" id="correctFile" multiple accept="image/*" aria-label="Doğru cevap görselleri yükle" />
+                <button class="btn ghost small" type="button" id="correctReset">Varsayılana dön</button>
+              </div>
+            </div>
 
-              <div class="image-field">
-                <strong>Yanlış cevap görseli</strong>
-                <div class="preview"><img id="previewWrong" alt="Yanlış cevap görseli önizlemesi" /></div>
-                <label class="field">
-                  <span>Görsel bağlantısı (URL)</span>
-                  <input id="wrongUrl" type="url" placeholder="https://... veya assets/wrong.svg" />
-                </label>
-                <div class="file-row">
-                  <input type="file" id="wrongFile" accept="image/*" aria-label="Yanlış cevap görseli yükle" />
-                  <button class="btn ghost small" type="button" id="wrongReset">Varsayılan</button>
-                </div>
+            <div class="visual-set">
+              <strong>Yanlış cevap görselleri</strong>
+              <p class="sub" style="margin: 4px 0 10px">Her yanlış cevapta bu listeden rastgele biri çıkar. GIF de eklenebilir.</p>
+              <div class="thumbs" id="wrongList"></div>
+              <div class="add-row">
+                <input id="wrongUrl" type="url" placeholder="Görsel bağlantısı (URL) yapıştır" aria-label="Yanlış cevap görseli bağlantısı" />
+                <button class="btn ghost small" type="button" id="wrongAddUrl">Ekle</button>
+              </div>
+              <div class="file-row">
+                <input type="file" id="wrongFile" multiple accept="image/*" aria-label="Yanlış cevap görselleri yükle" />
+                <button class="btn ghost small" type="button" id="wrongReset">Varsayılana dön</button>
               </div>
             </div>
 

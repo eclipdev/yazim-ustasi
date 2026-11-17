@@ -361,10 +361,18 @@ const feedbackCard = $("#feedbackCard");
 const feedbackImg = $("#feedbackImg");
 const feedbackCaption = $("#feedbackCaption");
 
-function showFeedback(isCorrect) {
-  const src = isCorrect
+// Doğru ya da yanlış için listedeki görsellerden rastgele biri seçilir.
+function pickImage(isCorrect) {
+  const list = isCorrect ? settings.correctImages : settings.wrongImages;
+  const pool = Array.isArray(list) ? list.filter(Boolean) : [];
+  if (pool.length) return pool[Math.floor(Math.random() * pool.length)];
+  return isCorrect
     ? settings.correctImage || defaultSettings.correctImage
     : settings.wrongImage || defaultSettings.wrongImage;
+}
+
+function showFeedback(isCorrect) {
+  const src = pickImage(isCorrect);
 
   feedbackCard.classList.toggle("good", isCorrect);
   feedbackCard.classList.toggle("bad", !isCorrect);
