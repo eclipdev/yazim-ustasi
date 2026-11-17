@@ -17,16 +17,9 @@
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="css/style.css" />
-    <noscript><style>.splash { display: none !important; }</style></noscript>
     <script src="js/theme-boot.js"></script>
   </head>
   <body>
-    <div class="splash" id="splash" aria-hidden="true">
-      <div class="splash-inner">
-        <img src="assets/icon.svg" alt="" width="72" height="72" />
-        <span>Yazım Ustası</span>
-      </div>
-    </div>
 
     <header class="topbar">
       <a class="brand" href="./" aria-label="Yazım Ustası ana ekran">
@@ -49,9 +42,10 @@
 
       <div class="prose">
         <h2 id="hakkimizda">Hakkımızda</h2>
+        <img class="about-logo" src="assets/eclip-logo.webp" alt="Eclip Software &amp; Entertainment Company logosu" width="160" height="160" />
         <p>
           Yazım Ustası, Türk Dil Kurumu’nun yazım kurallarını kısa sorularla
-          pekiştirmeye yardımcı olmak için hazırlanmış <strong>bağımsız bir eğitim
+          pekiştirmeye yardımcı olmak için hazırlanmış <strong>bir eğitim
           projesidir</strong>. Türk Dil Kurumu, Millî Eğitim Bakanlığı veya başka bir
           kurumla resmî bir bağlantısı yoktur.
         </p>
@@ -70,7 +64,7 @@
         <p>
           <strong>Nerede saklanır:</strong> Bilgiler öncelikle kullandığın tarayıcının
           yerel depolamasında (localStorage) tutulur. Site Firebase’e bağlıysa tur
-          sonuçları ayrıca Google Firebase Firestore’da (proje: tdk26-dd1b2) saklanır.
+          sonuçları ayrıca Google Firebase Firestore’da (proje: tdk26-dd1b2) saklanır. Ad, okul numarası ve puan bilgisi bu veritabanında tutulur. Puanlar yönetici panelindeki genel tabloda görünür; veritabanı kuralları gereği bu kayıtlar teknik olarak herkes tarafından okunabilir.
           Tarayıcı verilerini temizleyerek yerel kayıtları silebilirsin; Firestore
           kayıtlarının silinmesi için aşağıdaki iletişim kanalını kullanabilirsin.
         </p>
@@ -124,9 +118,11 @@
         <h2 id="iletisim">İletişim</h2>
         <p>
           Soru, hata bildirimi ve veri talepleri için
-          <a href="https://github.com/eclipdev" target="_blank" rel="noopener noreferrer">eclip by — GitHub</a>
-          profili üzerinden iletişime geçebilirsin.
+          <a href="mailto:eclipsoftware.dev@gmail.com">eclipsoftware.dev@gmail.com</a>
+          adresine e-posta gönderebilirsin.
         </p>
+        <p>
+          İşletmeci ve veri sorumlusu: Eclip Software &amp; Entertainment Company.</p>
         <p>
           Bu sayfa bilgilendirme amaçlıdır; hukuki danışmanlık yerine geçmez. Site
           yayıncısı, veri sorumlusu olarak bu sayfadaki esaslara uygun hareket eder.
@@ -143,19 +139,8 @@
           <a href="yasal.html#kosullar">Kullanım Koşulları</a>
           <a href="yasal.html#iletisim">İletişim</a>
         </nav>
-        <a
-          class="eclip-brand"
-          href="https://github.com/eclipdev"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="eclip by — GitHub profili"
-        >
-          <span class="eclip-mark" aria-hidden="true">e</span>
-          <span class="eclip-word">eclip <em>by</em></span>
-        </a>
+        <p class="eclip-brand">Eclip Software &amp; Entertainment Company</p>
       </div>
     </footer>
-
-    <script src="js/splash.js" defer></script>
   </body>
 </html>

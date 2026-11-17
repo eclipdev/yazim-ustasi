@@ -7,10 +7,12 @@ import {
   defaultAdminPasswordHash,
 } from "./data.js";
 import { store, KEYS } from "./store.js";
+import { todayKey } from "./progress.js";
 import {
   testFirebase,
   firebaseStatus,
   fetchRemoteResults,
+  fetchStudentTable,
   resetFirebaseCache,
   DEFAULT_FIREBASE_CONFIG,
 } from "./firebase.js";
@@ -567,7 +569,61 @@ function renderLocalResults() {
   renderTable(Array.isArray(list) ? list : [], "bu tarayıcı");
 }
 
+function renderScoreTable(rows) {
+  const wrap = $("#scoreWrap");
+  const count = $("#scoreCount");
+  wrap.textContent = "";
+  count.textContent = `${rows.length} öğrenci`;
+
+  if (!rows.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "Henüz puan kaydı yok.";
+    wrap.append(empty);
+    return;
+  }
+
+  const day = todayKey();
+  const table = document.createElement("table");
+  table.className = "results";
+  const head = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  ["Sıra", "Ad Soyad", "Okul no", "Bugün", "Toplam"].forEach((label) => {
+    const th = document.createElement("th");
+    th.textContent = label;
+    headRow.append(th);
+  });
+  head.append(headRow);
+  table.append(head);
+
+  const body = document.createElement("tbody");
+  rows.forEach((row, index) => {
+    const tr = document.createElement("tr");
+    const today = Number(row.days?.[day]?.score) || 0;
+    [index + 1, row.name || "—", row.schoolNo, today, row.total].forEach((value) => {
+      const td = document.createElement("td");
+      td.textContent = String(value);
+      tr.append(td);
+    });
+    body.append(tr);
+  });
+  table.append(body);
+  wrap.append(table);
+}
+
 function bindResults() {
+  $("#loadScores").addEventListener("click", async () => {
+    const status = $("#scoreStatus");
+    setStatus(status, "Tablo yükleniyor…");
+    const rows = await fetchStudentTable(200);
+    if (rows === null) {
+      setStatus(status, "Yüklenemedi. Firebase bağlantısını ve Firestore kurallarını kontrol et.", "err");
+      return;
+    }
+    renderScoreTable(rows);
+    setStatus(status, "Tablo güncellendi.", "ok");
+  });
+
   $("#refreshResults").addEventListener("click", () => {
     renderLocalResults();
     setStatus($("#resultsStatus"), "Yenilendi.", "ok");

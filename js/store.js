@@ -7,6 +7,7 @@ export const KEYS = {
   settings: "yazim.settings",
   questions: "yazim.questions",
   results: "yazim.results",
+  ledger: "yazim.ledger",
   firebase: "yazim.firebase",
   theme: "yazim.theme",
   adminPass: "yazim.adminPass",

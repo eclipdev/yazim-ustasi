@@ -141,3 +141,76 @@ export async function testFirebase() {
     return { ok: false, message: err?.message || "Bağlantı başarısız." };
   }
 }
+
+// Öğrenci başına tek doküman: students/{okulNo}.
+// Toplam ve günlük puan birikir (increment ile, yarış koşulunda da doğru kalır).
+export async function recordStudentRound({ schoolNo, name, day, score, correct, total }) {
+  const handle = await getDb();
+  if (!handle) return false;
+  try {
+    const { fs, db } = handle;
+    await fs.setDoc(
+      fs.doc(db, "students", String(schoolNo)),
+      {
+        name,
+        schoolNo: String(schoolNo),
+        total: fs.increment(score),
+        updatedAt: fs.serverTimestamp(),
+        days: {
+          [day]: {
+            score: fs.increment(score),
+            correct: fs.increment(correct),
+            total: fs.increment(total),
+            rounds: fs.increment(1),
+          },
+        },
+      },
+      { merge: true }
+    );
+    return true;
+  } catch (err) {
+    console.warn("Öğrenci puanı Firestore'a yazılamadı:", err);
+    return false;
+  }
+}
+
+export async function fetchStudentProgress(schoolNo, day) {
+  const handle = await getDb();
+  if (!handle) return null;
+  try {
+    const { fs, db } = handle;
+    const snap = await fs.getDoc(fs.doc(db, "students", String(schoolNo)));
+    if (!snap.exists()) return { total: 0, today: 0 };
+    const data = snap.data();
+    return {
+      total: Number(data.total) || 0,
+      today: Number(data.days?.[day]?.score) || 0,
+    };
+  } catch (err) {
+    console.warn("Öğrenci puanı okunamadı:", err);
+    return null;
+  }
+}
+
+// Genel puan tablosu için öğrencileri toplama göre sıralı çeker (yönetici paneli).
+export async function fetchStudentTable(max = 200) {
+  const handle = await getDb();
+  if (!handle) return null;
+  try {
+    const { fs, db } = handle;
+    const q = fs.query(fs.collection(db, "students"), fs.orderBy("total", "desc"), fs.limit(max));
+    const snap = await fs.getDocs(q);
+    return snap.docs.map((d) => {
+      const data = d.data();
+      return {
+        schoolNo: String(data.schoolNo ?? d.id),
+        name: String(data.name ?? ""),
+        total: Number(data.total) || 0,
+        days: data.days || {},
+      };
+    });
+  } catch (err) {
+    console.warn("Puan tablosu okunamadı:", err);
+    return null;
+  }
+}

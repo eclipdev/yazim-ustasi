@@ -202,6 +202,23 @@
           <div class="card admin-card">
             <div class="row between" style="margin-bottom: 14px">
               <div>
+                <h2>Genel puan tablosu</h2>
+                <p class="sub" style="margin-bottom: 0">Firebase'deki öğrenci toplamları, en yüksek puandan sıralı.</p>
+              </div>
+              <span class="badge" id="scoreCount">0 öğrenci</span>
+            </div>
+            <div class="table-wrap" id="scoreWrap">
+              <div class="empty">Tabloyu görmek için "Tabloyu yükle" düğmesine bas.</div>
+            </div>
+            <div class="row" style="margin-top: 14px">
+              <button class="btn ghost small" type="button" id="loadScores">Tabloyu yükle</button>
+            </div>
+            <p class="hint" id="scoreStatus" role="status"></p>
+          </div>
+
+          <div class="card admin-card">
+            <div class="row between" style="margin-bottom: 14px">
+              <div>
                 <h2>Öğrenci sonuçları</h2>
                 <p class="sub" style="margin-bottom: 0">Bu tarayıcıda kayıtlı turlar.</p>
               </div>

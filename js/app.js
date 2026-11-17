@@ -3,6 +3,7 @@
 import { defaultQuestions, defaultSettings } from "./data.js";
 import { store, KEYS } from "./store.js";
 import { saveResultToFirebase } from "./firebase.js";
+import { saveRound, localProgress, todayKey } from "./progress.js";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 
@@ -362,6 +363,31 @@ function finishRound() {
   saveResultToFirebase(result).then((saved) => {
     if (saved) console.info("Sonuç Firebase'e kaydedildi.");
   });
+
+  showRoundTotals(result);
+}
+
+// Tur puanını öğrencinin günlük ve toplam puanına ekler ve sonuç ekranında gösterir.
+async function showRoundTotals(result) {
+  const line = $("#resTotals");
+  const schoolNo = result.schoolNo;
+  if (!schoolNo || schoolNo === "-") {
+    line.textContent = "";
+    return;
+  }
+
+  // Önce yerel değer (anında), sonra Firebase'den gelen değer.
+  const local = localProgress(schoolNo, todayKey());
+  line.textContent = `Bugün ${local.today} puan · Toplam ${local.total} puan`;
+
+  const progress = await saveRound(state.profile, {
+    score: result.score,
+    correct: result.correct,
+    total: result.total,
+  });
+  line.textContent =
+    `Bugün ${progress.today} puan · Toplam ${progress.total} puan` +
+    (progress.remote ? "" : " (yalnızca bu tarayıcıda)");
 }
 
 // ---------- Olaylar ----------

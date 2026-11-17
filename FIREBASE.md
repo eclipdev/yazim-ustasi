@@ -48,6 +48,13 @@ service cloud.firestore {
       );
       allow read, update, delete: if false;
     }
+    match /students/{no} {
+      allow get, list: if true;
+      allow create, update: if request.resource.data.schoolNo == no
+        && request.resource.data.name is string
+        && request.resource.data.total is number;
+      allow delete: if false;
+    }
   }
 }
 ```
@@ -61,7 +68,17 @@ service cloud.firestore {
 > Not: Bu temel sürümde gerçek bir yönetici kimlik doğrulaması yok. Kontrollü bir
 > okul ortamı dışında `read` iznini açık bırakma.
 
-## 6. Koleksiyon
+## 6. Öğrenci puanları
+
+Her tur sonunda `students/{okulNo}` belgesi güncellenir: toplam puan ve gün gün
+puan (`days.YYYY-MM-DD`). Öğrenci okul numarasını girdiğinde kendi toplamını görür.
+Yönetici panelindeki **Genel puan tablosu** tüm öğrencileri toplama göre listeler;
+bunun için `students` koleksiyonunun listelenmesine (`allow list: if true`) izin
+verilmiştir. Yani ad, okul numarası ve puanlar veritabanını bilen herkes tarafından
+okunabilir. Bu bilinçli bir karar; gerçek bir hesap sistemi (Firebase Authentication)
+eklenene kadar bu kabul edilmiş bir risktir.
+
+## 7. Koleksiyon
 
 İlk sonuç yazıldığında `results` koleksiyonu otomatik oluşur. Her belge:
 
