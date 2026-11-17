@@ -29,8 +29,10 @@ oluştur.
 
 1. Sitenin `admin.html` sayfasını aç.
 2. **Firebase** sekmesine geç; yapılandırma hazır görünür.
-3. **Bağlantıyı test et** → kurallar yayınlanana kadar "Missing or insufficient
-   permissions" hatası normaldir.
+3. **Bağlantıyı test et** → uygulamanın kullandığı `results` koleksiyonuna
+   “Bağlantı Testi” adlı, 0 puanlık bir kayıt yazar. “Bağlantı başarılı” mesajı
+   yazma izninin de çalıştığını gösterir. Test kaydını Firebase Konsolu'ndan
+   silebilirsin; okuma kapalı olduğu için sitede görünmez.
 
 ## 5. Güvenlik kuralları (zorunlu)
 

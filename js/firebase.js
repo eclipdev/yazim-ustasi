@@ -109,14 +109,35 @@ export async function fetchRemoteResults(max = 50) {
 }
 
 // Paneldeki "Bağlantıyı test et" düğmesi için.
+// Okuma kuralı kapalı olabileceği için gerçek yazma yolunu dener:
+// uygulamanın kullandığı "results" koleksiyonuna işaretli bir test kaydı yazar.
 export async function testFirebase() {
   const handle = await getDb();
   if (!handle) return { ok: false, message: "Yapılandırma yok ya da SDK yüklenemedi." };
+
   try {
     const { fs, db } = handle;
-    await fs.getDocs(fs.query(fs.collection(db, "results"), fs.limit(1)));
-    return { ok: true, message: "Bağlantı başarılı." };
+    await fs.addDoc(fs.collection(db, "results"), {
+      name: "Bağlantı Testi",
+      schoolNo: "-",
+      score: 0,
+      correct: 0,
+      total: 0,
+      percent: 0,
+      at: new Date().toISOString(),
+      source: "panel-test",
+      createdAt: fs.serverTimestamp(),
+    });
+    return { ok: true, message: "Bağlantı başarılı — test kaydı Firestore'a yazıldı." };
   } catch (err) {
+    const code = String(err?.code || "");
+    if (code.includes("permission-denied")) {
+      return {
+        ok: false,
+        message:
+          "Firebase'e ulaşıldı ama Firestore kuralları yazmayı engelliyor. FIREBASE.md'deki kuralları yayınla.",
+      };
+    }
     return { ok: false, message: err?.message || "Bağlantı başarısız." };
   }
 }
