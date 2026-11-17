@@ -1038,6 +1038,14 @@ h2 {
   margin-top: 30px;
 }
 
+.prose h3 {
+  margin: 28px 0 8px;
+  font-size: 1.1875rem;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  color: var(--accent);
+}
+
 .prose p {
   margin: 0 0 14px;
   color: var(--text-2);
