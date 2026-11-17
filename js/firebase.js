@@ -266,6 +266,19 @@ export async function recordPlayerRound(uid, { day, score, correct, total }) {
   }
 }
 
+// Öğrencinin kendi okul numarası (yalnızca hesap sahibi okuyabilir).
+export async function fetchOwnSchoolNo(uid) {
+  const handle = await getDb();
+  if (!handle) return "";
+  try {
+    const { fs, db } = handle;
+    const snap = await fs.getDoc(fs.doc(db, "players", uid, "private", "info"));
+    return snap.exists() ? String(snap.data().schoolNo ?? "") : "";
+  } catch (err) {
+    return "";
+  }
+}
+
 export async function fetchPlayerProgress(uid, day) {
   const handle = await getDb();
   if (!handle) return null;

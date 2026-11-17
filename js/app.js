@@ -10,6 +10,7 @@ import {
   fetchPlayer,
   savePlayerProfile,
   fetchPlayerTable,
+  fetchOwnSchoolNo,
 } from "./firebase.js";
 import { saveRound, localProgress, todayKey } from "./progress.js";
 import { nameIsBad } from "./moderation.js";
@@ -114,7 +115,7 @@ async function refreshAuthUi() {
   if (player) {
     $("#playerName").value = player.name || user.displayName || "";
     $("#playerClass").value = player.className || "";
-    $("#playerNo").value = player.schoolNo || "";
+    $("#playerNo").value = await fetchOwnSchoolNo(user.uid);
   } else {
     $("#playerName").value = user.displayName || "";
   }
