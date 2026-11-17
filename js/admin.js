@@ -366,11 +366,11 @@ function bindQuestions() {
     if (!Array.isArray(bank)) bank = [...defaultQuestions];
 
     bank.push({
-      category: "Yazım kuralları",
-      question: "Yeni soru?",
-      options: ["Seçenek A", "Seçenek B", "Seçenek C", "Seçenek D"],
-      answer: "Seçenek A",
-      explanation: "Kısa açıklama.",
+      category: "Yazımı karıştırılanlar",
+      question: "Doğru yazımı seç.",
+      options: ["yanlış yazım", "doğru yazım"],
+      answer: "doğru yazım",
+      explanation: "Kısa kural açıklaması.",
     });
 
     $("#questionsEditor").value = JSON.stringify(bank, null, 2);

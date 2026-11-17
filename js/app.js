@@ -167,6 +167,7 @@ function renderQuestion() {
 
   const optionsBox = $("#qOptions");
   optionsBox.textContent = "";
+  optionsBox.classList.toggle("two", q.options.length === 2);
 
   const options = shuffle(
     q.options.map((text) => ({ text, isCorrect: text === q.answer }))

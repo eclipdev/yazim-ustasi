@@ -497,6 +497,12 @@ h2 {
   margin-top: 24px;
 }
 
+/* İki seçenekli kelime sorularında dokunma alanı daha rahat olsun */
+.options.two .option {
+  padding: 18px 20px;
+  font-size: 1.1875rem;
+}
+
 .option {
   display: flex;
   align-items: center;

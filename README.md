@@ -51,15 +51,16 @@ Yüklenen dosyalar base64 olarak tarayıcıda saklanır (dosya başına en fazla
 
 ### Soruları değiştirmek
 
-**Sorular** sekmesinde JSON düzenlenir. Her soru:
+**Sorular** sekmesinde JSON düzenlenir. Her soru, aynı kelimenin yanlış ve doğru
+yazımını iki seçenek olarak sunar; öğrenci doğru olanı seçer.
 
 ```json
 {
-  "category": "de / da",
-  "question": "Hangisi doğru yazılmıştır?",
-  "options": ["...", "...", "...", "..."],
-  "answer": "seçeneklerden biriyle birebir aynı metin",
-  "explanation": "Kısa kural açıklaması."
+  "category": "şey",
+  "question": "Doğru yazımı seç.",
+  "options": ["herşey", "her şey"],
+  "answer": "her şey",
+  "explanation": "“Şey” sözcüğü her zaman ayrı yazılır."
 }
 ```
 
