@@ -62,48 +62,52 @@
           <p class="eyebrow">TDK yazım kılavuzuna göre</p>
           <h1 class="display" id="loginTitle">Bir <mark>boşluk</mark>,<br />bir puan.</h1>
           <p class="lead">
-            “Her şey” mi, “herşey” mi? İki yazımdan doğrusunu seç. Her doğru 10 puan;
-            yanlışta kuralı hemen öğren. Puanın her gün birikir, sıralamada yerini al.
+            Google hesabınla giriş yap, sınıfını ve okul numaranı yaz. Her doğru cevap 10 puan;
+            puanın hesabında her gün birikir ve sıralamada yerini alır.
           </p>
         </div>
 
         <div class="login-row">
         <form class="card paper login-card" id="loginForm" novalidate>
-          <label class="field">
-            <span>Ad Soyad</span>
-            <input
-              id="playerName"
-              name="name"
-              type="text"
-              autocomplete="name"
-              required
-              maxlength="60"
-            />
-          </label>
-          <label class="field">
-            <span>Okul numarası</span>
-            <input
-              id="playerNo"
-              name="no"
-              type="text"
-              inputmode="numeric"
-              autocomplete="off"
-              required
-              maxlength="12"
-              pattern="[0-9]*"
-            />
-          </label>
-          <label class="consent">
-            <input type="checkbox" id="consentBox" />
-            <span>
-              Adımın ve okul numaramın yalnızca puanımı kaydetmek için kullanılmasına izin
-              veriyorum. 18 yaşından küçüksem velimin bilgisi vardır.
-              <a href="yasal.html#gizlilik" target="_blank" rel="noopener noreferrer">Gizlilik</a>
-              ·
-              <a href="yasal.html#haklar" target="_blank" rel="noopener noreferrer">Haklarım</a>
-            </span>
-          </label>
-          <button class="btn primary block" type="submit">Yazmaya başla</button>
+          <button class="btn primary block" id="googleBtn" type="button">Google ile giriş yap</button>
+          <p class="hint" id="authState"></p>
+
+          <fieldset class="profile-fields" id="profileFields" disabled>
+            <label class="field">
+              <span>Ad Soyad</span>
+              <input id="playerName" name="name" type="text" autocomplete="name" required maxlength="60" />
+            </label>
+            <label class="field">
+              <span>Sınıf</span>
+              <input id="playerClass" name="class" type="text" autocomplete="off" required maxlength="12" />
+            </label>
+            <label class="field">
+              <span>Okul numarası</span>
+              <input
+                id="playerNo"
+                name="no"
+                type="text"
+                inputmode="numeric"
+                autocomplete="off"
+                required
+                maxlength="12"
+                pattern="[0-9]*"
+              />
+            </label>
+            <label class="consent">
+              <input type="checkbox" id="consentBox" />
+              <span>
+                Google hesabımın adı ve e-posta adresim ile sınıfım ve okul numaram, yalnızca
+                hesabımı oluşturmak, puanımı kaydetmek ve sıralamayı göstermek için kullanılsın.
+                18 yaşından küçüksem velimin bilgisi vardır.
+                <a href="yasal.html#gizlilik" target="_blank" rel="noopener noreferrer">Gizlilik</a>
+                ·
+                <a href="yasal.html#haklar" target="_blank" rel="noopener noreferrer">Haklarım</a>
+              </span>
+            </label>
+            <button class="btn primary block" type="submit">Yazmaya başla</button>
+          </fieldset>
+
           <p class="hint" id="loginHint" role="status"></p>
         </form>
 

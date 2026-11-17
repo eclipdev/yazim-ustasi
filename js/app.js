@@ -2,21 +2,33 @@
 
 import { defaultQuestions, defaultSettings } from "./data.js";
 import { store, KEYS } from "./store.js";
-import { saveResultToFirebase, fetchStudentTable } from "./firebase.js";
+import {
+  saveResultToFirebase,
+  observeAuth,
+  signInWithGoogle,
+  signOutUser,
+  fetchPlayer,
+  savePlayerProfile,
+  fetchPlayerTable,
+} from "./firebase.js";
 import { saveRound, localProgress, todayKey } from "./progress.js";
+import { nameIsBad } from "./moderation.js";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 
 const settings = { ...defaultSettings, ...(store.get(KEYS.settings, {}) || {}) };
 
 const state = {
-  profile: null,
+  user: null,        // Google hesabı { uid, email, displayName }
+  banned: false,
+  profile: null,     // { uid, name, className, schoolNo }
   questions: [],
   index: 0,
   score: 0,
   correct: 0,
   answered: false,
   feedbackTimer: 0,
+  buttons: [],
 };
 
 // ---------- Yardımcılar ----------
@@ -47,20 +59,6 @@ function showView(name) {
   if (name === "login") chip.hidden = true;
 }
 
-function applyTheme(theme, announce = false) {
-  const root = document.documentElement;
-  if (theme === "auto") delete root.dataset.theme;
-  else root.dataset.theme = theme;
-
-  const btn = $("#themeToggle");
-  const label =
-    theme === "auto" ? "otomatik" : theme === "light" ? "açık" : "koyu";
-  btn.setAttribute("aria-label", `Tema: ${label}. Değiştirmek için dokun.`);
-  btn.title = `Tema: ${label}`;
-
-  if (announce) toast(`Tema: ${label}`, 1400);
-}
-
 function loadBank() {
   const custom = store.get(KEYS.questions, null);
   const raw = Array.isArray(custom) && custom.length ? custom : defaultQuestions;
@@ -75,25 +73,91 @@ function loadBank() {
   );
 }
 
-// ---------- Giriş ----------
+// ---------- Giriş (Google + sınıf + okul numarası) ----------
 
-function fillLogin() {
-  const profile = store.get(KEYS.profile, null);
-  if (!profile) return;
-  if (profile.name) $("#playerName").value = profile.name;
-  if (profile.schoolNo) $("#playerNo").value = profile.schoolNo;
+function setFieldsEnabled(enabled) {
+  $("#profileFields").disabled = !enabled;
 }
 
-function validateLogin(event) {
-  event.preventDefault();
-  const nameInput = $("#playerName");
-  const noInput = $("#playerNo");
-  const name = nameInput.value.trim().replace(/\s+/g, " ");
-  const no = noInput.value.trim();
+async function refreshAuthUi() {
+  const btn = $("#googleBtn");
   const hint = $("#loginHint");
+  const user = state.user;
 
-  nameInput.removeAttribute("aria-invalid");
-  noInput.removeAttribute("aria-invalid");
+  if (!user) {
+    btn.textContent = "Google ile giriş yap";
+    btn.className = "btn primary block";
+    $("#authState").textContent =
+      "Başlamak için Google hesabınla giriş yap. Puanın hesabına bağlı kalır.";
+    setFieldsEnabled(false);
+    state.banned = false;
+    return;
+  }
+
+  btn.textContent = `${user.email} · çıkış yap`;
+  btn.className = "btn ghost block";
+  $("#authState").textContent = "";
+  hint.textContent = "";
+  hint.classList.remove("error");
+
+  const player = await fetchPlayer(user.uid);
+  if (player?.banned) {
+    state.banned = true;
+    setFieldsEnabled(false);
+    hint.textContent = "Bu hesap yönetici tarafından kapatıldı. Sorular için yöneticine yaz.";
+    hint.classList.add("error");
+    return;
+  }
+
+  state.banned = false;
+  setFieldsEnabled(true);
+  if (player) {
+    $("#playerName").value = player.name || user.displayName || "";
+    $("#playerClass").value = player.className || "";
+    $("#playerNo").value = player.schoolNo || "";
+  } else {
+    $("#playerName").value = user.displayName || "";
+  }
+}
+
+async function onGoogleClick() {
+  const hint = $("#loginHint");
+  hint.classList.remove("error");
+  if (state.user) {
+    await signOutUser();
+    state.profile = null;
+    return;
+  }
+  hint.textContent = "Google penceresi açılıyor…";
+  try {
+    await signInWithGoogle();
+    hint.textContent = "";
+  } catch (err) {
+    hint.textContent = "Google girişi tamamlanamadı. Açılır pencereye izin verip tekrar dene.";
+    hint.classList.add("error");
+    console.warn(err);
+  }
+}
+
+async function validateLogin(event) {
+  event.preventDefault();
+  const hint = $("#loginHint");
+  const nameInput = $("#playerName");
+  const classInput = $("#playerClass");
+  const noInput = $("#playerNo");
+
+  if (!state.user) {
+    hint.textContent = "Önce Google ile giriş yap.";
+    hint.classList.add("error");
+    return;
+  }
+  if (state.banned) return;
+
+  const name = nameInput.value.trim().replace(/\s+/g, " ");
+  const className = classInput.value.trim().replace(/\s+/g, " ").toLocaleUpperCase("tr-TR");
+  const no = noInput.value.trim();
+
+  [nameInput, classInput, noInput].forEach((el) => el.removeAttribute("aria-invalid"));
 
   if (name.length < 2) {
     nameInput.setAttribute("aria-invalid", "true");
@@ -102,7 +166,13 @@ function validateLogin(event) {
     nameInput.focus();
     return;
   }
-
+  if (!className || className.length > 12) {
+    classInput.setAttribute("aria-invalid", "true");
+    hint.textContent = "Sınıfını yaz (örneğin 11-A).";
+    hint.classList.add("error");
+    classInput.focus();
+    return;
+  }
   if (!/^\d{1,12}$/.test(no)) {
     noInput.setAttribute("aria-invalid", "true");
     hint.textContent = "Okul numarası yalnızca rakamlardan oluşmalı.";
@@ -110,7 +180,6 @@ function validateLogin(event) {
     noInput.focus();
     return;
   }
-
   const consent = $("#consentBox");
   if (consent && !consent.checked) {
     hint.textContent = "Devam etmek için gizlilik iznini işaretle.";
@@ -119,11 +188,24 @@ function validateLogin(event) {
     return;
   }
 
-  hint.textContent = "";
+  hint.textContent = "Kaydediliyor…";
   hint.classList.remove("error");
 
-  state.profile = { name, schoolNo: no };
-  store.set(KEYS.profile, state.profile);
+  const flagged = nameIsBad(name);
+  const saved = await savePlayerProfile(state.user.uid, {
+    name,
+    className,
+    schoolNo: no,
+    nameFlagged: flagged,
+  });
+
+  state.profile = { uid: state.user.uid, name, className, schoolNo: no };
+  store.set(KEYS.profile, { name, className, schoolNo: no });
+  hint.textContent = "";
+
+  if (flagged) toast("Bu isim sıralamada görünmeyecek; yönetici inceleyecek.", 3200);
+  else if (!saved) toast("Sunucuya kaydedilemedi; puanlar bu tarayıcıda tutulur.", 3200);
+
   startRound();
 }
 
@@ -205,7 +287,6 @@ function renderQuestion() {
 
   updateScoreLine();
 
-  // odak, ekran okuyucular için soruya taşınır ama görünür halka oluşmaz
   $("#qText").setAttribute("tabindex", "-1");
 }
 
@@ -253,7 +334,6 @@ function selectOption(btn, text, q) {
   showFeedback(isCorrect);
   showExplanation(isCorrect, q);
 
-  // doğru yanıtta kısa, yanlışta öğrenmek için biraz daha uzun kal
   const hold = isCorrect ? 1500 : 2100;
   clearTimeout(state.feedbackTimer);
   state.feedbackTimer = setTimeout(hideFeedback, hold);
@@ -270,7 +350,6 @@ function showExplanation(isCorrect, q) {
   $("#explainText").textContent = q.explanation || "";
   block.hidden = false;
 
-  // Açıklama görünür olduğunda odak "Sonraki soru"da olsun
   $("#nextBtn").focus({ preventScroll: true });
 }
 
@@ -297,9 +376,7 @@ function showFeedback(isCorrect) {
   };
   feedbackImg.src = src;
 
-  feedbackCaption.textContent = isCorrect
-    ? "Tam isabet!"
-    : "Kırmızı kalem!";
+  feedbackCaption.textContent = isCorrect ? "Tam isabet!" : "Kırmızı kalem!";
 
   feedback.hidden = false;
   requestAnimationFrame(() => {
@@ -347,7 +424,9 @@ function finishRound() {
 
   const result = {
     name: state.profile?.name || "Öğrenci",
+    className: state.profile?.className || "-",
     schoolNo: state.profile?.schoolNo || "-",
+    uid: state.profile?.uid || "",
     score: state.score,
     correct: state.correct,
     total,
@@ -367,17 +446,14 @@ function finishRound() {
   showRoundTotals(result);
 }
 
-// Tur puanını öğrencinin günlük ve toplam puanına ekler ve sonuç ekranında gösterir.
 async function showRoundTotals(result) {
   const line = $("#resTotals");
-  const schoolNo = result.schoolNo;
-  if (!schoolNo || schoolNo === "-") {
-    line.textContent = "";
+  if (!result.uid) {
+    line.textContent = "Puanın kaydedilmedi: bu oturumda Google hesabı yok.";
     return;
   }
 
-  // Önce yerel değer (anında), sonra Firebase'den gelen değer.
-  const local = localProgress(schoolNo, todayKey());
+  const local = localProgress(result.uid, todayKey());
   line.textContent = `Bugün ${local.today} puan · Toplam ${local.total} puan`;
 
   const progress = await saveRound(state.profile, {
@@ -390,51 +466,9 @@ async function showRoundTotals(result) {
     (progress.remote ? "" : " (yalnızca bu tarayıcıda)");
 }
 
-// ---------- Olaylar ----------
+// ---------- Genel sıralama ----------
 
-function bindEvents() {
-  $("#loginForm").addEventListener("submit", validateLogin);
-
-  $("#nextBtn").addEventListener("click", nextQuestion);
-
-  $("#quitBtn").addEventListener("click", () => {
-    clearTimeout(state.feedbackTimer);
-    hideFeedback();
-    showView("login");
-    fillLogin();
-    toast("Tur kaydedilmeden kapatıldı.", 1800);
-  });
-
-  $("#againBtn").addEventListener("click", startRound);
-  $("#homeBtn").addEventListener("click", () => {
-    showView("login");
-    fillLogin();
-    loadBoard();
-  });
-
-  // Görsel katmanına tıklayınca erken kapanır
-  feedback.addEventListener("click", (event) => {
-    if (event.target.closest("[data-dismiss]")) hideFeedback();
-  });
-
-  // Enter / boşluk ile geri bildirimi geç
-  document.addEventListener("keydown", (event) => {
-    if (!feedback.hidden && (event.key === "Escape" || event.key === "Enter")) {
-      hideFeedback();
-    }
-  });
-
-  $("#themeToggle").addEventListener("click", () => {
-    const current = store.get(KEYS.theme, "auto");
-    const next = current === "auto" ? "light" : current === "light" ? "dark" : "auto";
-    store.set(KEYS.theme, next);
-    applyTheme(next, true);
-  });
-}
-
-// ---------- Başlat ----------
-
-// Ad soyadı kısaltır: "Yusuf Önal" -> "Yusuf Ö."; okul numarası gösterilmez.
+// Ad soyadı kısaltır: "Yusuf Önal" -> "Yusuf Ö."
 function maskName(name) {
   const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
   if (!parts.length) return "Öğrenci";
@@ -445,14 +479,11 @@ function maskName(name) {
 
 async function loadBoard() {
   const list = $("#boardList");
-  const status = $("#boardStatus");
-  const count = $("#boardCount");
   list.textContent = "";
-  status.textContent = "";
 
-  const rows = await fetchStudentTable(10);
+  const rows = await fetchPlayerTable(10);
   if (rows === null) {
-    count.textContent = "";
+    $("#boardCount").textContent = "";
     const li = document.createElement("li");
     li.className = "board-empty";
     li.textContent = "Sıralama şu an yüklenemedi.";
@@ -460,10 +491,9 @@ async function loadBoard() {
     return;
   }
 
-  const top = rows.filter((r) => r.total > 0).slice(0, 10);
-  count.textContent = top.length ? `İlk ${top.length}` : "";
+  $("#boardCount").textContent = rows.length ? `İlk ${rows.length}` : "";
 
-  if (!top.length) {
+  if (!rows.length) {
     const li = document.createElement("li");
     li.className = "board-empty";
     li.textContent = "Sayfa boş. İlk satırı sen yaz.";
@@ -472,7 +502,7 @@ async function loadBoard() {
   }
 
   const day = todayKey();
-  top.forEach((row, index) => {
+  rows.forEach((row, index) => {
     const li = document.createElement("li");
 
     const rank = document.createElement("span");
@@ -486,7 +516,8 @@ async function loadBoard() {
     name.textContent = maskName(row.name);
     const sub = document.createElement("span");
     sub.className = "board-sub";
-    sub.textContent = `Bugün ${Number(row.days?.[day]?.score) || 0} puan`;
+    const cls = row.className ? `${row.className} · ` : "";
+    sub.textContent = `${cls}Bugün ${Number(row.days?.[day]?.score) || 0} puan`;
     who.append(name, sub);
 
     const pts = document.createElement("span");
@@ -498,12 +529,58 @@ async function loadBoard() {
   });
 }
 
+// ---------- Olaylar ----------
+
+function bindEvents() {
+  $("#loginForm").addEventListener("submit", validateLogin);
+  $("#googleBtn").addEventListener("click", onGoogleClick);
+
+  $("#nextBtn").addEventListener("click", nextQuestion);
+
+  $("#quitBtn").addEventListener("click", () => {
+    clearTimeout(state.feedbackTimer);
+    hideFeedback();
+    showView("login");
+    fillLogin();
+    loadBoard();
+    toast("Tur kaydedilmeden kapatıldı.", 1800);
+  });
+
+  $("#againBtn").addEventListener("click", startRound);
+  $("#homeBtn").addEventListener("click", () => {
+    showView("login");
+    fillLogin();
+    loadBoard();
+  });
+
+  feedback.addEventListener("click", (event) => {
+    if (event.target.closest("[data-dismiss]")) hideFeedback();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (!feedback.hidden && (event.key === "Escape" || event.key === "Enter")) {
+      hideFeedback();
+    }
+  });
+}
+
+function fillLogin() {
+  refreshAuthUi();
+}
+
+// ---------- Başlat ----------
+
 function init() {
   store.set(KEYS.settings, settings);
-  applyTheme(store.get(KEYS.theme, "auto"));
   bindEvents();
-  fillLogin();
   showView("login");
+  setFieldsEnabled(false);
+
+  observeAuth((user) => {
+    state.user = user;
+    state.profile = null;
+    refreshAuthUi();
+  });
   loadBoard();
 }
 

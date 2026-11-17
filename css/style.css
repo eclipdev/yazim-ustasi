@@ -1174,3 +1174,43 @@ h2 {
     transform: none !important;
   }
 }
+
+/* ---------- Google girişi ve profil alanları ---------- */
+
+.profile-fields {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: grid;
+  gap: 22px;
+}
+
+.profile-fields:disabled {
+  opacity: 0.45;
+}
+
+@media (min-width: 860px) {
+  .login-row .board {
+    margin-top: 0;
+  }
+}
+
+/* ---------- Giriş ve sıralama yan yana (geniş ekran) ---------- */
+
+.login-row {
+  display: grid;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (min-width: 860px) {
+  .login-row {
+    grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+    column-gap: 48px;
+  }
+
+  body:has(#view-login:not([hidden])) main {
+    width: min(960px, 100%);
+  }
+}

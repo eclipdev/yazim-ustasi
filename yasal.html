@@ -76,14 +76,11 @@
 
         <h2 id="gizlilik">Gizlilik politikası</h2>
         <p>
-          <strong>Toplanan bilgiler:</strong> Girişte yazdığın ad soyad, okul numarası;
-          bir turun sonunda puan, doğru/yanlış sayısı ve tarih. Amaç yalnızca puanını
-          hesaplamak ve (öğretmenin kullanması hâlinde) ilerlemeni göstermektir.
-        </p>
+          <strong>Toplanan bilgiler:</strong> Google ile girişte hesabının adı ve e-posta adresi; sınıfın, okul numaran ve adın; bir turun sonunda puan, doğru/yanlış sayısı ve tarih. Amaç hesabını oluşturmak, puanını kaydetmek ve sıralamayı göstermektir.</p>
         <p>
           <strong>Nerede saklanır:</strong> Bilgiler öncelikle kullandığın tarayıcının
           yerel depolamasında (localStorage) tutulur. Site Firebase’e bağlıysa tur
-          sonuçları ayrıca Google Firebase Firestore’da (proje: tdk26-dd1b2) saklanır. Ad, okul numarası ve puan bilgisi bu veritabanında tutulur. Puanlar yönetici panelindeki genel tabloda görünür; veritabanı kuralları gereği bu kayıtlar teknik olarak herkes tarafından okunabilir.
+          sonuçları ayrıca Google Firebase Firestore’da (proje: tdk26-dd1b2) saklanır. Google hesabının adı ve e-posta adresi, sınıf, okul numarası ve puan bilgisi <code>players</code> belgesinde tutulur. Sıralamada ad soyad kısaltılır ve okul numarası gösterilmez; ancak veritabanı kuralları gereği bu kayıtlar teknik olarak herkes tarafından okunabilir. Yönetici, bir hesabı sıralamadan gizleyebilir veya girişini kapatabilir.
           Tarayıcı verilerini temizleyerek yerel kayıtları silebilirsin; Firestore
           kayıtlarının silinmesi için aşağıdaki iletişim kanalını kullanabilirsin.
         </p>
@@ -92,6 +89,8 @@
           üçüncü taraf analitik/izleme aracı çalıştırmaz. Tema, giriş ve ayar tercihleri
           yalnızca yerel depolamada tutulur.
         </p>
+        <p>
+          <strong>Hesap ve silme:</strong> Hesabını ve bu hesaba bağlı puan kayıtlarını silmek istersen iletişim adresinden yaz; talebin üzerine kaydını kaldırırız.</p>
         <p>
           <strong>18 yaşından küçük kullanıcılar:</strong> Siteyi velinin veya
           öğretmenin bilgisi dahilinde kullanmalısın. Ad ve okul numarası gibi bilgileri

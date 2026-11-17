@@ -1,103 +1,118 @@
 # Firebase kurulumu
 
-Site Firebase olmadan da çalışır (sonuçlar tarayıcıda tutulur). Projenin web
-yapılandırması `js/firebase.js` içinde hazır durumda; site Firestore'a bağlanmayı
-dener. **Yazmanın çalışması için Firestore kurallarını bir kez yayınlaman gerekir**
-(aşağıdaki 5. adım). Kurallar yayınlanmazsa Firebase "permission denied" döner ve
-sonuç yalnızca tarayıcıda kalır.
+Site Firebase olmadan da çalışır; ama Google girişi, puan kaydı, sıralama ve
+yönetici işlemleri için Firebase gerekir. Proje: `tdk26-dd1b2`.
+Konsol: https://console.firebase.google.com/project/tdk26-dd1b2
 
-> Not: Projede bir Realtime Database de var (`databaseURL`), ancak site şu an
-> Firestore kullanıyor. Realtime Database'e geçmek istersen söyle.
+## 1. Google girişini aç
 
-## 1. Proje
+1. Konsol → **Build → Authentication → Sign-in method**.
+2. **Google** sağlayıcısını etkinleştir, destek e-postası olarak
+   `eclipsoftware.dev@gmail.com` seç, **Kaydet**.
+3. **Settings → Authorized domains** listesine şunları ekle:
+   - `eclipdev.github.io`
+   - `localhost` (yerel deneme için, zaten olabilir)
 
-Firebase projesi: `tdk26-dd1b2` · Konsol:
-https://console.firebase.google.com/project/tdk26-dd1b2
+Eklemezsen Google penceresi "unauthorized domain" hatası verir.
 
-## 2. Web uygulaması
+## 2. Firestore'u başlat
 
-Web yapılandırması `js/firebase.js` içindeki `DEFAULT_FIREBASE_CONFIG` alanında
-duruyor. Başka bir proje kullanmak istersen panelden değiştirebilirsin. Bu anahtarlar
-**gizli değildir**; koruma Firestore kurallarıyla yapılır.
+Konsol → **Build → Firestore Database** → **Create database** (zaten varsa atla).
 
-## 3. Firestore'u başlat
+## 3. Güvenlik kuralları (zorunlu)
 
-Konsol → **Build → Firestore Database**. Veritabanı yoksa **Create database** ile
-oluştur.
-
-## 4. Yapılandırmayı kontrol et
-
-1. Sitenin `admin.html` sayfasını aç.
-2. **Firebase** sekmesine geç; yapılandırma hazır görünür.
-3. **Bağlantıyı test et** → uygulamanın kullandığı `results` koleksiyonuna
-   “Bağlantı Testi” adlı, 0 puanlık bir kayıt yazar. “Bağlantı başarılı” mesajı
-   yazma izninin de çalıştığını gösterir. Test kaydını Firebase Konsolu'ndan
-   silebilirsin; okuma kapalı olduğu için sitede görünmez.
-
-## 5. Güvenlik kuralları (zorunlu)
-
-Firestore → **Rules** sekmesine aşağıdakini yapıştırıp **Publish** et:
+Firestore → **Rules** sekmesine aşağıdakini yapıştırıp **Publish** et.
+Yönetici yetkisi `eclipsoftware.dev@gmail.com` Google hesabına verilmiştir; bu
+hesapla yönetici panelinde giriş yapılınca oyuncuları gizleyip banlayabilirsin.
 
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'eclipsoftware.dev@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+
     match /results/{doc} {
       allow create: if request.resource.data.keys().hasAll(
         ['name','schoolNo','score','correct','total','percent']
       );
       allow read, update, delete: if false;
     }
-    match /students/{no} {
+
+    match /players/{uid} {
       allow get, list: if true;
-      allow create, update: if request.resource.data.schoolNo == no
+
+      allow create: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.get('banned', false) == false
         && request.resource.data.name is string
-        && request.resource.data.total is number;
+        && request.resource.data.className is string
+        && request.resource.data.schoolNo is string;
+
+      allow update: if (
+          request.auth != null
+          && request.auth.uid == uid
+          && resource.data.get('banned', false) == false
+          && request.resource.data.get('banned', false) == resource.data.get('banned', false)
+          && (request.resource.data.get('flagged', false) == resource.data.get('flagged', false)
+              || request.resource.data.get('flagged', false) == true)
+        ) || (
+          isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['banned', 'flagged'])
+        );
+
       allow delete: if false;
+    }
+
+    match /students/{no} {
+      allow read, write: if false;
     }
   }
 }
 ```
 
-- `allow create`: site yeni sonuç yazabilir.
-- `allow read: if false`: sonuçları kimse okuyamaz. Paneldeki "Firebase'den çek"
-  düğmesini kullanmak istersen geçici olarak `allow read: if true;` yapabilirsin;
-  ancak bu, öğrenci adı ve numaralarını herkese açar. Kalıcı çözüm için Firebase
-  Authentication ekleyip okumayı yalnızca yöneticiye vermek gerekir.
+Bu kuralların anlamı:
 
-> Not: Bu temel sürümde gerçek bir yönetici kimlik doğrulaması yok. Kontrollü bir
-> okul ortamı dışında `read` iznini açık bırakma.
+- Öğrenci yalnızca kendi `players/{uid}` belgesine yazabilir ve kendi bayrağını
+  kaldıramaz.
+- Banlanmış hesap (`banned: true`) hiçbir şey yazamaz; puanı kaydedilmez.
+- Yönetici yalnızca `banned` ve `flagged` alanlarını değiştirebilir.
+- `students` koleksiyonu eski sürümden kalmadır ve kapalıdır. İstersen Konsol'dan
+  silebilirsin.
 
-## 6. Öğrenci puanları
+## 4. Bağlantıyı kontrol et
 
-Her tur sonunda `students/{okulNo}` belgesi güncellenir: toplam puan ve gün gün
-puan (`days.YYYY-MM-DD`). Öğrenci okul numarasını girdiğinde kendi toplamını görür.
-Yönetici panelindeki **Genel puan tablosu** tüm öğrencileri toplama göre listeler;
-bunun için `students` koleksiyonunun listelenmesine (`allow list: if true`) izin
-verilmiştir. Yani ad, okul numarası ve puanlar veritabanını bilen herkes tarafından
-okunabilir. Bu bilinçli bir karar; gerçek bir hesap sistemi (Firebase Authentication)
-eklenene kadar bu kabul edilmiş bir risktir.
+Yönetici paneli → **Firebase** → **Bağlantıyı test et**. Sonra ana sayfada
+**Google ile giriş yap** ile bir hesap aç; sınıfını ve okul numaranı yazıp
+bir tur çöz. Puan `players` koleksiyonunda belirmeli.
 
-## 7. Koleksiyon
+## 5. Koleksiyonlar
 
-İlk sonuç yazıldığında `results` koleksiyonu otomatik oluşur. Her belge:
+**players/{uid}** (her Google hesabı için bir belge):
 
-| Alan | Örnek |
+| Alan | Açıklama |
 | --- | --- |
-| `name` | `Ad Soyad` |
-| `schoolNo` | `1234` |
-| `score` | `120` |
-| `correct` | `12` |
-| `total` | `12` |
-| `percent` | `100` |
-| `at` | ISO tarih (istemciden) |
-| `createdAt` | Sunucu zaman damgası |
+| `uid` | Google hesabının kimliği |
+| `name` | Ad soyad |
+| `className` | Sınıf, örneğin `11-A` |
+| `schoolNo` | Okul numarası |
+| `total` | Toplam puan |
+| `days` | Gün gün puan: `days.YYYY-MM-DD` |
+| `flagged` | `true` ise sıralamada gizlenir (isim filtresi veya yönetici) |
+| `banned` | `true` ise hesap puan kazanamaz ve girişi kapanır |
 
-## Sorun giderme
+**results**: Eski tur kayıtları (yönetici paneli için, yalnızca yazılır).
 
-- **Test başarısız:** Yapılandırmayı kaydettikten sonra test et; sayfayı yenilemek
-  gerekmez (panel önbelleği sıfırlar).
-- **`permission-denied`:** Kuralları yayınladığından ve koleksiyon adının `results`
-  olduğundan emin ol.
-- **`api-key-not-valid`:** `apiKey` alanını kopyalarken tırnakları dahil etmediğinden
-  emin ol; panel JSON bekler.
+## 6. Dikkat edilecekler
+
+- Sıralamada ad soyad kısaltılıp gösterilir (Yusuf Ö.), okul numarası gösterilmez.
+  Ama `players` belgeleri herkesin okuyabildiği bir koleksiyondur; veritabanını
+  bilen biri ham veriyi okuyabilir. Bu bilinçli bir karardır ve gizlilik metninde
+  yazılıdır.
+- İsim filtresi bir ön filtredir; her küfürü yakalamaz. Yakalanan hesap sıralamada
+  gizlenir ve yönetici panelinden açılabilir.
+- Kurallar sunucu tarafında doğrulanır; istemci kodu değiştirilse de banlı hesap
+  yazamaz.

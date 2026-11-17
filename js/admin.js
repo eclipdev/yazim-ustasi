@@ -13,6 +13,11 @@ import {
   firebaseStatus,
   fetchRemoteResults,
   fetchStudentTable,
+  observeAuth,
+  signInWithGoogle,
+  signOutUser,
+  setPlayerFlags,
+  isAdminUser,
   resetFirebaseCache,
   DEFAULT_FIREBASE_CONFIG,
 } from "./firebase.js";
@@ -176,7 +181,7 @@ function bindGate() {
 
 // ---------- Sekmeler ----------
 
-const TAB_IDS = ["settings", "questions", "results", "firebase"];
+const TAB_IDS = ["settings", "questions", "results", "players", "firebase"];
 
 function showTab(name) {
   TAB_IDS.forEach((tab) => {
@@ -188,6 +193,7 @@ function showTab(name) {
   });
 
   if (name === "results") renderLocalResults();
+  if (name === "players") loadPlayers();
   if (name === "firebase") refreshFirebaseUi();
 }
 
@@ -750,6 +756,7 @@ function hydrate() {
   bindPassword();
   bindQuestions();
   bindResults();
+  bindPlayers();
   bindFirebase();
   bindTabs();
   refreshFirebaseUi();
@@ -771,3 +778,159 @@ function init() {
 }
 
 init();
+
+// ---------- Oyuncular (Google yönetici girişi + gizle/banla) ----------
+
+let adminUser = null;
+
+function renderAdminWho() {
+  const who = $("#adminWho");
+  const btn = $("#adminSignIn");
+  if (!adminUser) {
+    who.textContent = "Girilmedi";
+    btn.textContent = "Google ile giriş yap";
+    return;
+  }
+  who.textContent = isAdminUser(adminUser) ? `Yönetici: ${adminUser.email}` : `Yetkisiz: ${adminUser.email}`;
+  btn.textContent = "Çıkış yap";
+}
+
+function bindPlayers() {
+  observeAuth((user) => {
+    adminUser = user;
+    renderAdminWho();
+  });
+
+  $("#adminSignIn").addEventListener("click", async () => {
+    const status = $("#adminStatus");
+    if (adminUser) {
+      await signOutUser();
+      setStatus(status, "Çıkış yapıldı.", "ok");
+      return;
+    }
+    try {
+      const user = await signInWithGoogle();
+      if (!isAdminUser(user)) {
+        await signOutUser();
+        setStatus(status, "Bu Google hesabı yönetici değil. Yetkili hesapla giriş yap.", "err");
+      } else {
+        setStatus(status, "Yönetici girişi tamam.", "ok");
+      }
+    } catch (err) {
+      console.warn(err);
+      setStatus(status, "Google girişi tamamlanamadı.", "err");
+    }
+  });
+
+  $("#loadPlayers").addEventListener("click", loadPlayers);
+}
+
+function requireAdmin(status) {
+  if (isAdminUser(adminUser)) return true;
+  setStatus(status, "Önce yönetici Google hesabıyla giriş yap.", "err");
+  return false;
+}
+
+async function loadPlayers() {
+  const status = $("#playersStatus");
+  const wrap = $("#playerWrap");
+  setStatus(status, "Yükleniyor…");
+  const rows = await fetchStudentTable(300);
+  if (rows === null) {
+    setStatus(status, "Oyuncular okunamadı. Firestore kurallarını ve bağlantıyı kontrol et.", "err");
+    return;
+  }
+
+  $("#playerCount").textContent = `${rows.length} hesap`;
+  wrap.textContent = "";
+
+  if (!rows.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "Henüz hesap yok.";
+    wrap.append(empty);
+    setStatus(status, "");
+    return;
+  }
+
+  const table = document.createElement("table");
+  table.className = "results";
+  const head = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  ["Ad Soyad", "Sınıf", "No", "Toplam", "Durum", "İşlem"].forEach((label) => {
+    const th = document.createElement("th");
+    th.textContent = label;
+    headRow.append(th);
+  });
+  head.append(headRow);
+  table.append(head);
+
+  const body = document.createElement("tbody");
+  rows.forEach((row) => {
+    const tr = document.createElement("tr");
+
+    const cells = [row.name || "—", row.className || "—", row.schoolNo || "—", String(row.total)];
+    cells.forEach((value, i) => {
+      const td = document.createElement("td");
+      if (i === 3) td.className = "num";
+      td.textContent = value;
+      tr.append(td);
+    });
+
+    const stateCell = document.createElement("td");
+    const tags = [];
+    if (row.banned) tags.push("Yasaklı");
+    if (row.flagged) tags.push("Gizli");
+    stateCell.textContent = tags.length ? tags.join(" · ") : "Açık";
+    tr.append(stateCell);
+
+    const actions = document.createElement("td");
+    const flagBtn = document.createElement("button");
+    flagBtn.type = "button";
+    flagBtn.className = "btn ghost small";
+    flagBtn.textContent = row.flagged ? "Göster" : "Gizle";
+    flagBtn.dataset.uid = row.uid;
+    flagBtn.dataset.action = "flag";
+    flagBtn.dataset.value = row.flagged ? "false" : "true";
+
+    const banBtn = document.createElement("button");
+    banBtn.type = "button";
+    banBtn.className = row.banned ? "btn ghost small" : "btn danger small";
+    banBtn.textContent = row.banned ? "Yasağı kaldır" : "Banla";
+    banBtn.dataset.uid = row.uid;
+    banBtn.dataset.action = "ban";
+    banBtn.dataset.value = row.banned ? "false" : "true";
+    banBtn.dataset.name = row.name || "Bu hesap";
+
+    actions.append(flagBtn, " ", banBtn);
+    tr.append(actions);
+    body.append(tr);
+  });
+  table.append(body);
+  wrap.append(table);
+  setStatus(status, "Liste güncellendi.", "ok");
+}
+
+async function applyPlayerAction(button) {
+  const status = $("#playersStatus");
+  if (!requireAdmin(status)) return;
+  const value = button.dataset.value === "true";
+  const field = button.dataset.action === "ban" ? "banned" : "flagged";
+
+  if (field === "banned" && value) {
+    if (!confirm(`${button.dataset.name} hesabı banlansın mı? Hesap puan kazanamaz ve giriş yapamaz.`)) return;
+  }
+
+  setStatus(status, "Kaydediliyor…");
+  const result = await setPlayerFlags(button.dataset.uid, { [field]: value });
+  if (!result.ok) {
+    setStatus(status, result.message, "err");
+    return;
+  }
+  await loadPlayers();
+}
+
+document.addEventListener("click", (event) => {
+  const btn = event.target.closest("#playerWrap button[data-action]");
+  if (btn) applyPlayerAction(btn);
+});

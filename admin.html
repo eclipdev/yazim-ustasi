@@ -67,6 +67,7 @@
           <button role="tab" id="tabbtn-settings" aria-controls="tab-settings" aria-selected="true" data-tab="settings">Ayarlar</button>
           <button role="tab" id="tabbtn-questions" aria-controls="tab-questions" aria-selected="false" data-tab="questions">Sorular</button>
           <button role="tab" id="tabbtn-results" aria-controls="tab-results" aria-selected="false" data-tab="results">Sonuçlar</button>
+          <button role="tab" id="tabbtn-players" aria-controls="tab-players" aria-selected="false" data-tab="players">Oyuncular</button>
           <button role="tab" id="tabbtn-firebase" aria-controls="tab-firebase" aria-selected="false" data-tab="firebase">Firebase</button>
         </nav>
 
@@ -230,6 +231,35 @@
               <button class="btn danger small" type="button" id="clearResults">Yerel kayıtları sil</button>
             </div>
             <p class="hint" id="resultsStatus" role="status"></p>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="tab-players" role="tabpanel" aria-labelledby="tabbtn-players" hidden>
+          <div class="card admin-card">
+            <h2>Yönetici girişi</h2>
+            <p class="sub">Oyuncuları yalnızca yönetici Google hesabı değiştirebilir.</p>
+            <div class="row">
+              <button class="btn primary small" type="button" id="adminSignIn">Google ile giriş yap</button>
+              <span class="badge" id="adminWho">Girilmedi</span>
+            </div>
+            <p class="hint" id="adminStatus" role="status"></p>
+          </div>
+
+          <div class="card admin-card">
+            <div class="row between" style="margin-bottom: 14px">
+              <div>
+                <h2>Oyuncular</h2>
+                <p class="sub" style="margin-bottom: 0">Gizle: sıralamada görünmez. Banla: puan kazanamaz ve girişi kapanır.</p>
+              </div>
+              <span class="badge" id="playerCount">0</span>
+            </div>
+            <div class="table-wrap" id="playerWrap">
+              <div class="empty">Listeyi görmek için Yenile'ye bas.</div>
+            </div>
+            <div class="row" style="margin-top: 14px">
+              <button class="btn ghost small" type="button" id="loadPlayers">Yenile</button>
+            </div>
+            <p class="hint" id="playersStatus" role="status"></p>
           </div>
         </div>
 
