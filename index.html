@@ -13,8 +13,9 @@
       name="description"
       content="TDK yazım kuralları üzerine soru çözerek puan kazandığın, sade ve akıcı bir alıştırma uygulaması."
     />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#0e0d0a" />
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/fonts.css" />
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/theme-boot.js"></script>
   </head>
@@ -59,7 +60,7 @@
       <section class="view" id="view-login" aria-labelledby="loginTitle">
         <div class="hero">
           <p class="eyebrow">Türk Dil Kurumu yazım kuralları</p>
-          <h1 class="display" id="loginTitle">Doğru yaz,<br />puan kazan.</h1>
+          <h1 class="display" id="loginTitle"><mark>Doğru</mark> yaz,<br />puan kazan.</h1>
           <p class="lead">
             Adınla ve okul numaranla giriş yap. Her doğru cevap 10 puan. Yanlışta doğrusunu
             öğren, doğruda bir sonraki soruya geç.
@@ -67,7 +68,7 @@
         </div>
 
         <div class="login-row">
-        <form class="card login-card" id="loginForm" novalidate>
+        <form class="card paper login-card" id="loginForm" novalidate>
           <label class="field">
             <span>Ad Soyad</span>
             <input
@@ -106,7 +107,7 @@
           <p class="hint" id="loginHint" role="status"></p>
         </form>
 
-        <aside class="card board" aria-labelledby="boardTitle">
+        <aside class="board" aria-labelledby="boardTitle">
           <div class="board-head">
             <h2 id="boardTitle">Genel sıralama</h2>
             <span class="chip" id="boardCount"></span>
@@ -139,7 +140,7 @@
           </div>
         </div>
 
-        <article class="card question-card" id="questionCard">
+        <article class="card paper question-card" id="questionCard">
           <p class="eyebrow" id="qCategory">Yazım kuralları</p>
           <h2 class="question" id="qText"></h2>
           <div class="options" id="qOptions" role="group" aria-label="Seçenekler"></div>
@@ -158,7 +159,7 @@
 
       <!-- Sonuç -->
       <section class="view" id="view-result" aria-labelledby="resMsg" hidden>
-        <div class="card result-card">
+        <div class="card paper result-card">
           <p class="eyebrow">Tur tamamlandı</p>
           <p class="result-score"><span id="resScore">0</span><small>puan</small></p>
           <p class="lead" id="resMsg"></p>
