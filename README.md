@@ -12,7 +12,11 @@ doğru cevaplar kadar puan toplar.
 - **Görsel geri bildirim:** Doğru ve yanlış cevap için ayrı görseller; panelden URL
   yapıştırarak ya da dosya yükleyerek değiştirilebilir. Şimdilik yer tutucu SVG'ler var.
 - **Yönetim paneli (`admin.html`):** Görseller, tur ayarları, soru bankası (JSON),
-  sonuçlar ve Firebase bağlantısı.
+  sonuçlar ve Firebase bağlantısı. Şifre düz metin olarak değil, SHA-256 özeti
+  olarak saklanır; 5 hatalı denemeden sonra 30 saniyelik bekleme uygulanır.
+- **Gizlilik ve yasal:** Ad + okul numarası için girişte açık izin kutusu; alt
+  bilgide Hakkımızda, Gizlilik, KVKK/Kullanıcı Hakları, Kullanım Koşulları ve
+  İletişim bağlantıları (`yasal.html`).
 - **Firebase (isteğe bağlı):** Yapılandırılırsa her tur sonucu Firestore'a yazılır;
   yapılandırılmazsa site localStorage ile çalışır.
 - **Apple tarzı arayüz:** Sistem fontu, translüzen yüzeyler, yumuşak yaylar, koyu/açık
@@ -83,6 +87,7 @@ Adım adım kılavuz: [FIREBASE.md](FIREBASE.md). Özetle:
 ```
 index.html          # öğrenci arayüzü
 admin.html          # yönetim paneli
+yasal.html          # gizlilik, KVKK hakları, kullanım koşulları
 css/style.css       # ana tasarım
 css/admin.css       # panelin ek stilleri
 js/data.js          # varsayılan soru bankası + ayarlar
@@ -90,6 +95,8 @@ js/store.js         # localStorage katmanı
 js/firebase.js      # isteğe bağlı Firestore köprüsü
 js/app.js           # sınav mantığı
 js/admin.js         # panel mantığı
+js/splash.js        # her yenilemede açılış ekranı
+js/theme-boot.js    # ilk boyamadan önce tema
 assets/             # simge ve yer tutucu görseller
 ```
 

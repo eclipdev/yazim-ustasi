@@ -110,6 +110,14 @@ function validateLogin(event) {
     return;
   }
 
+  const consent = $("#consentBox");
+  if (consent && !consent.checked) {
+    hint.textContent = "Devam etmek için gizlilik iznini işaretle.";
+    hint.classList.add("error");
+    consent.focus();
+    return;
+  }
+
   hint.textContent = "";
   hint.classList.remove("error");
 

@@ -456,3 +456,7 @@ export const defaultSettings = {
 };
 
 export const defaultAdminPassword = "kaptan";
+
+// "kaptan" şifresinin SHA-256 özeti. Panelde şifre düz metin olarak saklanmaz.
+export const defaultAdminPasswordHash =
+  "caa3425632ced38a3f1712d1a3fb2d2bf6743033ea0d67d59a4f1a9afacf086b";

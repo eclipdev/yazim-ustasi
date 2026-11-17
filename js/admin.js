@@ -1,6 +1,11 @@
 // Yazım Ustası — yönetim paneli
 
-import { defaultQuestions, defaultSettings, defaultAdminPassword } from "./data.js";
+import {
+  defaultQuestions,
+  defaultSettings,
+  defaultAdminPassword,
+  defaultAdminPasswordHash,
+} from "./data.js";
 import { store, KEYS } from "./store.js";
 import {
   testFirebase,
@@ -63,8 +68,69 @@ const pending = {
 
 // ---------- Şifre kapısı ----------
 
-function storedPassword() {
-  return store.get(KEYS.adminPass, defaultAdminPassword);
+const FAIL_KEY = "yazim.adminFailures";
+const LOCK_KEY = "yazim.adminLock";
+
+async function sha256Hex(text) {
+  try {
+    const data = new TextEncoder().encode(text);
+    const digest = await crypto.subtle.digest("SHA-256", data);
+    return [...new Uint8Array(digest)]
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  } catch {
+    return null;
+  }
+}
+
+// Şifre düz metin saklanmaz. Eski düz metin kayıtları ilk başarılı girişte hash'e taşınır.
+async function passwordMatches(input) {
+  const stored = store.get(KEYS.adminPass, null);
+
+  if (stored === null) {
+    const hash = await sha256Hex(input);
+    if (hash) return hash === defaultAdminPasswordHash;
+    return input === defaultAdminPassword;
+  }
+
+  if (stored === input) {
+    const hash = await sha256Hex(input);
+    if (hash) store.set(KEYS.adminPass, hash);
+    return true;
+  }
+
+  if (/^[a-f0-9]{64}$/i.test(String(stored))) {
+    const hash = await sha256Hex(input);
+    return hash !== null && hash === String(stored).toLowerCase();
+  }
+
+  return false;
+}
+
+async function setPassword(newPassword) {
+  const hash = await sha256Hex(newPassword);
+  store.set(KEYS.adminPass, hash || newPassword);
+}
+
+function lockSecondsLeft() {
+  const until = Number(store.sessionGet(LOCK_KEY) || 0);
+  if (!Number.isFinite(until) || until <= Date.now()) return 0;
+  return Math.ceil((until - Date.now()) / 1000);
+}
+
+function recordFailure() {
+  const failures = Number(store.sessionGet(FAIL_KEY) || 0) + 1;
+  if (failures >= 5) {
+    store.sessionSet(LOCK_KEY, String(Date.now() + 30000));
+    store.sessionSet(FAIL_KEY, "0");
+  } else {
+    store.sessionSet(FAIL_KEY, String(failures));
+  }
+}
+
+function clearFailures() {
+  store.sessionSet(FAIL_KEY, "0");
+  store.sessionSet(LOCK_KEY, "0");
 }
 
 function unlockPanel() {
@@ -74,17 +140,31 @@ function unlockPanel() {
 }
 
 function bindGate() {
-  $("#gateForm").addEventListener("submit", (event) => {
+  $("#gateForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     const input = $("#gatePass");
     const hint = $("#gateHint");
 
-    if (input.value === storedPassword()) {
+    const wait = lockSecondsLeft();
+    if (wait > 0) {
+      hint.textContent = `Çok fazla deneme. ${wait} saniye sonra tekrar dene.`;
+      hint.classList.add("error");
+      return;
+    }
+
+    if (await passwordMatches(input.value)) {
+      clearFailures();
       store.sessionSet(KEYS.adminUnlocked, "1");
       hint.textContent = "";
+      hint.classList.remove("error");
+      input.removeAttribute("aria-invalid");
       unlockPanel();
     } else {
-      hint.textContent = "Şifre yanlış. İlk şifre: kaptan";
+      recordFailure();
+      const locked = lockSecondsLeft();
+      hint.textContent = locked
+        ? `Çok fazla yanlış deneme. ${locked} saniye sonra tekrar dene.`
+        : "Şifre yanlış. İlk şifre: kaptan";
       hint.classList.add("error");
       input.setAttribute("aria-invalid", "true");
       input.select();
@@ -249,11 +329,11 @@ function bindRound() {
 // ---------- Yönetici şifresi ----------
 
 function bindPassword() {
-  $("#savePass").addEventListener("click", () => {
+  $("#savePass").addEventListener("click", async () => {
     const current = $("#passCurrent").value;
     const next = $("#passNew").value;
 
-    if (current !== storedPassword()) {
+    if (!(await passwordMatches(current))) {
       setStatus($("#passStatus"), "Mevcut şifre yanlış.", "err");
       return;
     }
@@ -262,7 +342,7 @@ function bindPassword() {
       return;
     }
 
-    store.set(KEYS.adminPass, next);
+    await setPassword(next);
     $("#passCurrent").value = "";
     $("#passNew").value = "";
     setStatus($("#passStatus"), "Şifre değiştirildi.", "ok");
