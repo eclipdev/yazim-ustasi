@@ -368,3 +368,37 @@ export async function setPlayerFlags(uid, patch) {
     return { ok: false, message: err?.message || "Güncellenemedi." };
   }
 }
+
+// ---------- Ortak görsel listesi (config/visuals) ----------
+// Doğru/yanlış görselleri bütün öğrencilere aynı gelsin diye Firestore'da tutulur.
+// Yalnızca bağlantılar saklanır; dosyanın kendisi bağlantının olduğu yerde durur.
+
+export async function fetchVisuals() {
+  const handle = await getDb();
+  if (!handle) return null;
+  try {
+    const { fs, db } = handle;
+    const snap = await fs.getDoc(fs.doc(db, "config", "visuals"));
+    return snap.exists() ? snap.data() : null;
+  } catch (err) {
+    console.warn("Görsel listesi okunamadı:", err);
+    return null;
+  }
+}
+
+export async function saveVisuals({ correctImages, wrongImages }) {
+  const handle = await getDb();
+  if (!handle) return { ok: false, code: "firebase-yok" };
+  try {
+    const { fs, db } = handle;
+    await fs.setDoc(fs.doc(db, "config", "visuals"), {
+      correctImages,
+      wrongImages,
+      updatedAt: fs.serverTimestamp(),
+    });
+    return { ok: true };
+  } catch (err) {
+    console.warn("Görsel listesi kaydedilemedi:", err);
+    return { ok: false, code: String(err?.code || err?.message || "bilinmeyen-hata") };
+  }
+}

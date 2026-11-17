@@ -75,6 +75,16 @@ service cloud.firestore {
       }
     }
 
+    // Ortak ayarlar (doğru/yanlış görsel listesi): herkes okur, yalnızca yönetici yazar.
+    match /config/{doc} {
+      allow read: if true;
+      allow write: if isAdmin()
+        && request.resource.data.correctImages is list
+        && request.resource.data.wrongImages is list
+        && request.resource.data.correctImages.size() <= 50
+        && request.resource.data.wrongImages.size() <= 50;
+    }
+
     match /students/{no} {
       allow read, write: if false;
     }
@@ -114,6 +124,9 @@ bir tur çöz. Puan `players` koleksiyonunda belirmeli.
 
 **players/{uid}/private/info**: Okul numarası (`schoolNo`). Yalnızca hesap sahibi
 ve yönetici okuyabilir; herkese açık sıralamaya girmez.
+
+**config/visuals**: Doğru ve yanlış görsel listeleri (`correctImages`, `wrongImages`).
+Yalnızca bağlantılar tutulur; yönetici panelinden kaydedilir ve bütün öğrencilere aynı gelir.
 
 **results**: Eski tur kayıtları (yönetici paneli için, yalnızca yazılır).
 

@@ -11,6 +11,7 @@ import {
   savePlayerProfile,
   fetchPlayerTable,
   fetchOwnSchoolNo,
+  fetchVisuals,
 } from "./firebase.js";
 import { saveRound, localProgress, todayKey } from "./progress.js";
 import { nameIsBad } from "./moderation.js";
@@ -631,6 +632,17 @@ function init() {
     refreshAuthUi();
   });
   loadBoard();
+
+  // Yöneticinin seçtiği ortak görsel listesi (bütün öğrencilerde aynı).
+  fetchVisuals().then((shared) => {
+    if (!shared) return;
+    if (Array.isArray(shared.correctImages) && shared.correctImages.length) {
+      settings.correctImages = shared.correctImages;
+    }
+    if (Array.isArray(shared.wrongImages) && shared.wrongImages.length) {
+      settings.wrongImages = shared.wrongImages;
+    }
+  });
 }
 
 init();

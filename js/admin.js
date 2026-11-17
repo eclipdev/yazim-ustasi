@@ -19,6 +19,8 @@ import {
   signOutUser,
   setPlayerFlags,
   isAdminUser,
+  fetchVisuals,
+  saveVisuals,
   resetFirebaseCache,
   DEFAULT_FIREBASE_CONFIG,
 } from "./firebase.js";
@@ -245,7 +247,12 @@ function renderList(side) {
     const img = document.createElement("img");
     img.alt = `${cfg.label} görseli ${index + 1}`;
     img.src = src;
-    img.onerror = () => { img.src = cfg.fallback; };
+    img.onerror = () => {
+      img.onerror = null;
+      figure.classList.add("broken");
+      figure.title = "Bu bağlantı açılmadı; GIF ya da görselin doğrudan adresi olmalı.";
+      img.src = cfg.fallback;
+    };
     const remove = document.createElement("button");
     remove.type = "button";
     remove.textContent = "✕";
@@ -293,30 +300,13 @@ function bindSide(side) {
       toast("Önce bir görsel bağlantısı yapıştır.");
       return;
     }
+    if (!/^https:\/\//i.test(value) && !/^assets\//i.test(value)) {
+      toast("Bağlantı https:// ile başlamalı.", 2800);
+      return;
+    }
     addToList(side, value);
     $(cfg.urlEl).value = "";
     setStatus($("#imageStatus"), "Bağlantı listeye eklendi. Kaydetmeyi unutma.", "ok");
-  });
-
-  $(cfg.fileEl).addEventListener("change", async (event) => {
-    const files = [...(event.target.files || [])];
-    event.target.value = "";
-    let added = 0;
-    for (const file of files) {
-      try {
-        const src = await readImageFile(file);
-        if (totalPendingBytes() + src.length > IMAGE_TOTAL_LIMIT) {
-          toast("Toplam görsel boyutu çok büyük. Bazı dosyalar eklenmedi.", 3000);
-          break;
-        }
-        pending[cfg.listKey].push(src);
-        added += 1;
-      } catch (err) {
-        toast(err.message);
-      }
-    }
-    renderList(side);
-    if (added) setStatus($("#imageStatus"), `${added} görsel eklendi. Kaydetmeyi unutma.`, "ok");
   });
 
   $(cfg.resetEl).addEventListener("click", () => {
@@ -326,13 +316,38 @@ function bindSide(side) {
   });
 }
 
+async function loadSharedVisuals() {
+  const shared = await fetchVisuals();
+  if (!shared) return;
+  if (Array.isArray(shared.correctImages) && shared.correctImages.length) {
+    pending.correctList = [...shared.correctImages];
+  }
+  if (Array.isArray(shared.wrongImages) && shared.wrongImages.length) {
+    pending.wrongList = [...shared.wrongImages];
+  }
+  renderList("correct");
+  renderList("wrong");
+}
+
 function bindVisuals() {
   bindSide("correct");
   bindSide("wrong");
+  loadSharedVisuals();
 
-  $("#saveVisuals").addEventListener("click", () => {
-    const correctImages = [...pending.correctList];
-    const wrongImages = [...pending.wrongList];
+  $("#saveVisuals").addEventListener("click", async () => {
+    const status = $("#imageStatus");
+    if (!isAdminUser(adminUser)) {
+      setStatus(status, "Kaydetmek için önce Oyuncular sekmesinden yönetici Google girişi yap.", "err");
+      return;
+    }
+    const correctImages = pending.correctList.filter((src) => !src.startsWith("data:"));
+    const wrongImages = pending.wrongList.filter((src) => !src.startsWith("data:"));
+    setStatus(status, "Kaydediliyor…");
+    const result = await saveVisuals({ correctImages, wrongImages });
+    if (!result.ok) {
+      setStatus(status, `Kaydedilemedi (${result.code}).`, "err");
+      return;
+    }
     settings = {
       ...settings,
       correctImages,
@@ -340,12 +355,8 @@ function bindVisuals() {
       correctImage: correctImages[0] || defaultSettings.correctImage,
       wrongImage: wrongImages[0] || defaultSettings.wrongImage,
     };
-    const ok = store.set(KEYS.settings, settings);
-    if (!ok) {
-      toast("Kaydedilemedi — görseller çok büyük. Bazılarını kaldırıp tekrar dene.", 3200);
-      return;
-    }
-    setStatus($("#imageStatus"), "Görseller kaydedildi.", "ok");
+    store.set(KEYS.settings, settings);
+    setStatus(status, "Görseller kaydedildi; bütün öğrencilerde görünecek.", "ok");
     toast("Görseller kaydedildi.");
   });
 }

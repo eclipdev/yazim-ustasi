@@ -76,8 +76,11 @@
           <div class="card admin-card">
             <h2>Doğru ve yanlış görselleri</h2>
             <p class="sub">
-              Öğrenci doğru yanıtladığında ve yanlış yanıtladığında hangi görselin çıkacağını
-              buradan belirle. Bir bağlantı yapıştırabilir ya da cihazından dosya yükleyebilirsin.
+              Öğrenci doğru ya da yanlış yanıtladığında listeden rastgele biri çıkar. Görselleri
+              <strong>bağlantı</strong> olarak ekle: GIF ya da görselin doğrudan adresi (sonu .gif,
+              .png, .jpg, .webp olan adres). Giphy veya Tenor'da GIF'e sağ tıklayıp "Resim adresini
+              kopyala" de. Boyut sınırı yok. Kaydetmek için Oyuncular sekmesinden yönetici Google
+              girişi gerekir; kaydedilen liste bütün öğrencilerde görünür.
             </p>
 
             <div class="visual-set">
@@ -88,8 +91,7 @@
                 <input id="correctUrl" type="url" placeholder="Görsel bağlantısı (URL) yapıştır" aria-label="Doğru cevap görseli bağlantısı" />
                 <button class="btn ghost small" type="button" id="correctAddUrl">Ekle</button>
               </div>
-              <div class="file-row">
-                <input type="file" id="correctFile" multiple accept="image/*" aria-label="Doğru cevap görselleri yükle" />
+              <div class="row">
                 <button class="btn ghost small" type="button" id="correctReset">Varsayılana dön</button>
               </div>
             </div>
@@ -102,8 +104,7 @@
                 <input id="wrongUrl" type="url" placeholder="Görsel bağlantısı (URL) yapıştır" aria-label="Yanlış cevap görseli bağlantısı" />
                 <button class="btn ghost small" type="button" id="wrongAddUrl">Ekle</button>
               </div>
-              <div class="file-row">
-                <input type="file" id="wrongFile" multiple accept="image/*" aria-label="Yanlış cevap görselleri yükle" />
+              <div class="row">
                 <button class="btn ghost small" type="button" id="wrongReset">Varsayılana dön</button>
               </div>
             </div>
