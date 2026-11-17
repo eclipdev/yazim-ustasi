@@ -84,7 +84,7 @@ eklenene kadar bu kabul edilmiş bir risktir.
 
 | Alan | Örnek |
 | --- | --- |
-| `name` | `Yusuf Önal` |
+| `name` | `Ad Soyad` |
 | `schoolNo` | `1234` |
 | `score` | `120` |
 | `correct` | `12` |
