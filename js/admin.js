@@ -7,6 +7,7 @@ import {
   firebaseStatus,
   fetchRemoteResults,
   resetFirebaseCache,
+  DEFAULT_FIREBASE_CONFIG,
 } from "./firebase.js";
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -530,15 +531,18 @@ function refreshFirebaseUi() {
   if (status.ready) {
     badge.textContent = status.label;
     badge.className = "badge ok";
+  } else if (saved && saved.disabled) {
+    badge.textContent = "Kapatıldı";
+    badge.className = "badge off";
   } else {
     badge.textContent = "Yapılandırılmadı";
     badge.className = "badge off";
   }
 
-  if (!saved) {
+  if (saved && saved.disabled) {
     $("#firebaseEditor").value = "";
   } else if (!document.activeElement || document.activeElement.id !== "firebaseEditor") {
-    $("#firebaseEditor").value = JSON.stringify(saved, null, 2);
+    $("#firebaseEditor").value = JSON.stringify(saved || DEFAULT_FIREBASE_CONFIG, null, 2);
   }
 }
 
@@ -548,7 +552,7 @@ function bindFirebase() {
     const status = $("#firebaseStatus");
 
     if (!raw) {
-      store.remove(KEYS.firebase);
+      store.set(KEYS.firebase, { disabled: true });
       resetFirebaseCache();
       refreshFirebaseUi();
       setStatus(status, "Bağlantı kaldırıldı.", "ok");
@@ -584,7 +588,7 @@ function bindFirebase() {
   });
 
   $("#clearFirebase").addEventListener("click", () => {
-    store.remove(KEYS.firebase);
+    store.set(KEYS.firebase, { disabled: true });
     resetFirebaseCache();
     $("#firebaseEditor").value = "";
     refreshFirebaseUi();

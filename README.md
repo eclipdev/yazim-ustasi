@@ -72,10 +72,11 @@ yeniden yayınla.
 
 Adım adım kılavuz: [FIREBASE.md](FIREBASE.md). Özetle:
 
-1. Firebase Konsolu'nda proje oluştur, bir web uygulaması ekle.
-2. Firestore'u başlat.
-3. Web yapılandırmasını `admin.html` → **Firebase** sekmesine yapıştır ve kaydet.
-4. Güvenlik kurallarını kılavuzdaki gibi ayarla.
+- Projenin web yapılandırması `js/firebase.js` içinde hazır (`tdk26-dd1b2`).
+- Sonuçların Firestore'a yazılması için **Firestore → Rules** bölümüne
+  `FIREBASE.md`'deki kuralları yapıştırıp yayınlaman gerekir.
+- Panel → **Firebase** sekmesinden başka bir proje girilebilir ya da bağlantı
+  kapatılabilir.
 
 ## Dosya yapısı
 

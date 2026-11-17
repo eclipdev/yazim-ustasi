@@ -9,6 +9,20 @@ const SDK_VERSION = "10.14.1";
 const APP_URL = `https://www.gstatic.com/firebasejs/${SDK_VERSION}/firebase-app.js`;
 const FS_URL = `https://www.gstatic.com/firebasejs/${SDK_VERSION}/firebase-firestore.js`;
 
+// Projenin herkese açık Firebase web yapılandırması.
+// Bu anahtarlar gizli değildir; güvenlik Firestore kurallarıyla sağlanır.
+// Panelden farklı bir proje girilirse o kullanılır, "Kaldır" denirse devre dışı kalır.
+export const DEFAULT_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyANjKiQdsaQC66S2TAp8VgLmBhGpK1MqKI",
+  authDomain: "tdk26-dd1b2.firebaseapp.com",
+  databaseURL: "https://tdk26-dd1b2-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "tdk26-dd1b2",
+  storageBucket: "tdk26-dd1b2.firebasestorage.app",
+  messagingSenderId: "235445487544",
+  appId: "1:235445487544:web:0ae69b8b44696a01b4314d",
+  measurementId: "G-KR9G9BKJJD",
+};
+
 let cached = null;
 let failed = false;
 
@@ -19,13 +33,23 @@ export function resetFirebaseCache() {
 }
 
 export function getFirebaseConfig() {
-  const cfg = store.get(KEYS.firebase, null);
-  if (!cfg || typeof cfg !== "object") return null;
-  if (!cfg.apiKey || !cfg.projectId) return null;
-  return cfg;
+  const saved = store.get(KEYS.firebase, null);
+
+  // Hiç kayıt yoksa projenin varsayılan yapılandırması kullanılır.
+  if (saved === null) return DEFAULT_FIREBASE_CONFIG;
+
+  // Panelden bilerek kapatıldıysa hiçbir şey yapma.
+  if (saved && saved.disabled) return null;
+
+  if (typeof saved !== "object") return null;
+  if (!saved.apiKey || !saved.projectId) return null;
+  return saved;
 }
 
 export function firebaseStatus() {
+  const saved = store.get(KEYS.firebase, null);
+  if (saved && saved.disabled) return { ready: false, label: "Kapatıldı" };
+
   const cfg = getFirebaseConfig();
   if (!cfg) return { ready: false, label: "Yapılandırılmadı" };
   return { ready: true, label: cfg.projectId };

@@ -1,49 +1,40 @@
 # Firebase kurulumu
 
-Site Firebase olmadan da çalışır (sonuçlar tarayıcıda tutulur). Firebase'i
-bağlarsan her tur sonucu Firestore'a da yazılır; böylece farklı cihazlardaki
-öğrencilerin sonuçlarını tek yerde toplayabilirsin.
+Site Firebase olmadan da çalışır (sonuçlar tarayıcıda tutulur). Projenin web
+yapılandırması `js/firebase.js` içinde hazır durumda; site Firestore'a bağlanmayı
+dener. **Yazmanın çalışması için Firestore kurallarını bir kez yayınlaman gerekir**
+(aşağıdaki 5. adım). Kurallar yayınlanmazsa Firebase "permission denied" döner ve
+sonuç yalnızca tarayıcıda kalır.
 
-## 1. Proje oluştur
+> Not: Projede bir Realtime Database de var (`databaseURL`), ancak site şu an
+> Firestore kullanıyor. Realtime Database'e geçmek istersen söyle.
 
-1. [Firebase Konsolu](https://console.firebase.google.com/) → **Proje ekle**.
-2. İsim ver (örn. `yazim-ustasi`). Google Analytics'i kapatabilirsin.
+## 1. Proje
 
-## 2. Web uygulaması ekle
+Firebase projesi: `tdk26-dd1b2` · Konsol:
+https://console.firebase.google.com/project/tdk26-dd1b2
 
-1. Proje ana sayfasında **`</>`** (Web) simgesine tıkla.
-2. Uygulamaya bir takma ad ver (örn. `yazim-ustasi-web`).
-3. Firebase sana şuna benzer bir yapılandırma verir:
+## 2. Web uygulaması
 
-```json
-{
-  "apiKey": "AIza...",
-  "authDomain": "yazim-ustasi.firebaseapp.com",
-  "projectId": "yazim-ustasi",
-  "storageBucket": "yazim-ustasi.appspot.com",
-  "messagingSenderId": "1234567890",
-  "appId": "1:1234567890:web:abcd1234"
-}
-```
-
-Bu anahtar **gizli değildir**; web uygulamalarında herkese açıktır. Koruma
-Firestore kurallarıyla yapılır.
+Web yapılandırması `js/firebase.js` içindeki `DEFAULT_FIREBASE_CONFIG` alanında
+duruyor. Başka bir proje kullanmak istersen panelden değiştirebilirsin. Bu anahtarlar
+**gizli değildir**; koruma Firestore kurallarıyla yapılır.
 
 ## 3. Firestore'u başlat
 
-1. Sol menü → **Build → Firestore Database → Create database**.
-2. Konum seç, **Production mode** ile başla (kuralları aşağıda ayarlayacağız).
+Konsol → **Build → Firestore Database**. Veritabanı yoksa **Create database** ile
+oluştur.
 
-## 4. Yapılandırmayı siteye gir
+## 4. Yapılandırmayı kontrol et
 
 1. Sitenin `admin.html` sayfasını aç.
-2. **Firebase** sekmesine geç.
-3. Yapılandırma JSON'unu yapıştır ve **Kaydet**.
-4. **Bağlantıyı test et** ile doğrula.
+2. **Firebase** sekmesine geç; yapılandırma hazır görünür.
+3. **Bağlantıyı test et** → kurallar yayınlanana kadar "Missing or insufficient
+   permissions" hatası normaldir.
 
-## 5. Güvenlik kuralları
+## 5. Güvenlik kuralları (zorunlu)
 
-Firestore → **Rules** sekmesine aşağıdakini yapıştırıp yayınla:
+Firestore → **Rules** sekmesine aşağıdakini yapıştırıp **Publish** et:
 
 ```
 rules_version = '2';
