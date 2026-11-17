@@ -1,0 +1,396 @@
+/* Yönetim paneli — ana stil dosyasının üzerine eklenir */
+
+.admin-main {
+  width: min(880px, 100%);
+  margin: 0 auto;
+  padding: clamp(24px, 4vw, 44px) clamp(18px, 4vw, 24px) 90px;
+}
+
+.admin-head {
+  padding: 4px 4px 22px;
+}
+
+.admin-title {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 2.8rem);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+.admin-head .lead {
+  margin-top: 12px;
+}
+
+/* Giriş kapısı */
+
+.gate-card {
+  max-width: 460px;
+  margin: 6vh auto 0;
+  padding: clamp(24px, 5vw, 34px);
+  display: grid;
+  gap: 16px;
+}
+
+.gate-card h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  letter-spacing: -0.025em;
+}
+
+/* Sekmeler */
+
+.segmented {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 14px;
+  background: var(--chip);
+  margin-bottom: 22px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.segmented::-webkit-scrollbar {
+  display: none;
+}
+
+.segmented button {
+  flex: 1 0 auto;
+  min-height: 38px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s var(--ease), color 0.2s var(--ease),
+    box-shadow 0.2s var(--ease), transform 0.16s var(--spring);
+}
+
+.segmented button[aria-selected="true"] {
+  background: var(--surface-solid);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.segmented button:active {
+  transform: scale(0.98);
+}
+
+.tab-panel {
+  animation: view-in 0.4s var(--spring) both;
+}
+
+/* Kartlar */
+
+.admin-card {
+  padding: clamp(20px, 3.5vw, 28px);
+  margin-bottom: 16px;
+}
+
+.admin-card h2 {
+  font-size: 1.1875rem;
+  letter-spacing: -0.015em;
+  margin: 0 0 6px;
+}
+
+.admin-card .sub {
+  margin: 0 0 18px;
+  color: var(--text-2);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.admin-card .sub a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.admin-card .sub a:hover {
+  text-decoration: underline;
+}
+
+.admin-card .sub code {
+  font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  background: var(--chip);
+  padding: 1px 5px;
+  border-radius: 5px;
+}
+
+.admin-card + .admin-card {
+  margin-top: 0;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.row.between {
+  justify-content: space-between;
+}
+
+.row.end {
+  justify-content: flex-end;
+}
+
+.stack {
+  display: grid;
+  gap: 14px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+/* Görsel önizleme */
+
+.image-field {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 18px;
+  background: var(--surface-soft);
+}
+
+.image-field .preview {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface-solid);
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+}
+
+.image-field .preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.image-field .field input {
+  background: var(--surface-solid);
+}
+
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.file-row input[type="file"] {
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--text-2);
+  max-width: 100%;
+}
+
+.file-row input[type="file"]::file-selector-button {
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface-solid);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 8px 14px;
+  margin-right: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease);
+}
+
+.file-row input[type="file"]::file-selector-button:hover {
+  background: var(--surface-soft-hover);
+}
+
+/* Küçük düğmeler */
+
+.btn.small {
+  min-height: 40px;
+  padding: 0 16px;
+  font-size: 0.9375rem;
+}
+
+.btn.danger {
+  background: var(--bad-soft);
+  color: var(--bad);
+}
+
+.btn.danger:hover {
+  background: rgba(255, 59, 48, 0.2);
+}
+
+/* Metin alanları */
+
+textarea.code {
+  width: 100%;
+  min-height: 340px;
+  resize: vertical;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  color: var(--text);
+  font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  outline: none;
+  tab-size: 2;
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease),
+    background-color 0.2s var(--ease);
+}
+
+textarea.code:focus {
+  background: var(--surface-solid);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+textarea.code.invalid {
+  border-color: var(--bad-strong);
+}
+
+.status {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-3);
+  min-height: 1.4em;
+}
+
+.status.ok {
+  color: var(--good);
+}
+
+.status.err {
+  color: var(--bad);
+}
+
+/* Sonuç tablosu */
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+}
+
+table.results {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  min-width: 520px;
+}
+
+table.results th,
+table.results td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+table.results th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  background: var(--chip);
+}
+
+table.results tr:last-child td {
+  border-bottom: none;
+}
+
+table.results td.num {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 0.9375rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--chip);
+  color: var(--text-2);
+}
+
+.badge.ok {
+  background: var(--good-soft);
+  color: var(--good);
+}
+
+.badge.off {
+  background: var(--bad-soft);
+  color: var(--bad);
+}
+
+.badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.note {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: var(--accent-soft);
+  color: var(--text-2);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.note.warn {
+  background: rgba(255, 149, 0, 0.12);
+}
+
+.note code {
+  font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  background: var(--chip);
+  padding: 1px 5px;
+  border-radius: 5px;
+}
+
+/* Ayırıcı */
+
+.divider {
+  height: 1px;
+  background: var(--line);
+  margin: 22px 0;
+  border: none;
+}
+
+@media (max-width: 520px) {
+  .segmented button {
+    flex: 0 0 auto;
+    padding: 8px 14px;
+  }
+}

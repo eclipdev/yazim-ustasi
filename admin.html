@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Panel — Yazım Ustası</title>
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/admin.css" />
+    <script>
+      try {
+        var t = JSON.parse(localStorage.getItem("yazim.theme") || '"auto"');
+        if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Yazım Ustası ana ekran">
+        <img src="assets/icon.svg" alt="" width="26" height="26" />
+        <span>Yazım Ustası</span>
+      </a>
+      <div class="topbar-actions">
+        <a class="icon-btn" href="./" aria-label="Siteye dön" title="Siteye dön">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+        <button class="icon-btn" id="themeToggle" type="button" aria-label="Tema: otomatik" title="Tema">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <!-- Şifre kapısı -->
+      <section class="view" id="gate">
+        <form class="card gate-card" id="gateForm" novalidate>
+          <p class="eyebrow">Yönetim</p>
+          <h1>Panele giriş</h1>
+          <p class="sub" style="margin: 0; color: var(--text-2); font-size: 0.9375rem">
+            Görselleri, soruları ve Firebase bağlantısını buradan yönetirsin.
+          </p>
+          <label class="field">
+            <span>Yönetici şifresi</span>
+            <input id="gatePass" type="password" autocomplete="current-password" required placeholder="••••••••" />
+          </label>
+          <button class="btn primary block" type="submit">Aç</button>
+          <p class="hint" id="gateHint" role="status"></p>
+        </form>
+      </section>
+
+      <!-- Panel -->
+      <section id="panel" hidden>
+        <div class="admin-head">
+          <p class="eyebrow">Yönetim</p>
+          <h1 class="admin-title">Panel</h1>
+          <p class="lead">Sitenin görsellerini, soru bankasını ve veri bağlantısını buradan ayarla.</p>
+        </div>
+
+        <nav class="segmented" role="tablist" aria-label="Panel bölümleri">
+          <button role="tab" id="tabbtn-settings" aria-controls="tab-settings" aria-selected="true" data-tab="settings">Ayarlar</button>
+          <button role="tab" id="tabbtn-questions" aria-controls="tab-questions" aria-selected="false" data-tab="questions">Sorular</button>
+          <button role="tab" id="tabbtn-results" aria-controls="tab-results" aria-selected="false" data-tab="results">Sonuçlar</button>
+          <button role="tab" id="tabbtn-firebase" aria-controls="tab-firebase" aria-selected="false" data-tab="firebase">Firebase</button>
+        </nav>
+
+        <!-- Ayarlar -->
+        <div class="tab-panel" id="tab-settings" role="tabpanel" aria-labelledby="tabbtn-settings">
+          <div class="card admin-card">
+            <h2>Doğru ve yanlış görselleri</h2>
+            <p class="sub">
+              Öğrenci doğru yanıtladığında ve yanlış yanıtladığında hangi görselin çıkacağını
+              buradan belirle. Bir bağlantı yapıştırabilir ya da cihazından dosya yükleyebilirsin.
+            </p>
+
+            <div class="grid-2">
+              <div class="image-field">
+                <strong>Doğru cevap görseli</strong>
+                <div class="preview"><img id="previewCorrect" alt="Doğru cevap görseli önizlemesi" /></div>
+                <label class="field">
+                  <span>Görsel bağlantısı (URL)</span>
+                  <input id="correctUrl" type="url" placeholder="https://... veya assets/correct.svg" />
+                </label>
+                <div class="file-row">
+                  <input type="file" id="correctFile" accept="image/*" aria-label="Doğru cevap görseli yükle" />
+                  <button class="btn ghost small" type="button" id="correctReset">Varsayılan</button>
+                </div>
+              </div>
+
+              <div class="image-field">
+                <strong>Yanlış cevap görseli</strong>
+                <div class="preview"><img id="previewWrong" alt="Yanlış cevap görseli önizlemesi" /></div>
+                <label class="field">
+                  <span>Görsel bağlantısı (URL)</span>
+                  <input id="wrongUrl" type="url" placeholder="https://... veya assets/wrong.svg" />
+                </label>
+                <div class="file-row">
+                  <input type="file" id="wrongFile" accept="image/*" aria-label="Yanlış cevap görseli yükle" />
+                  <button class="btn ghost small" type="button" id="wrongReset">Varsayılan</button>
+                </div>
+              </div>
+            </div>
+
+            <p class="hint" id="imageStatus" role="status"></p>
+            <div class="row end">
+              <button class="btn primary small" type="button" id="saveVisuals">Görselleri kaydet</button>
+            </div>
+          </div>
+
+          <div class="card admin-card">
+            <h2>Tur ayarları</h2>
+            <p class="sub">Bir turda kaç soru sorulsun ve her doğru kaç puan getirsin?</p>
+            <div class="grid-2">
+              <label class="field">
+                <span>Tur başına soru</span>
+                <input id="roundSize" type="number" min="1" max="100" step="1" inputmode="numeric" />
+              </label>
+              <label class="field">
+                <span>Doğru başına puan</span>
+                <input id="pointsPerCorrect" type="number" min="1" max="1000" step="1" inputmode="numeric" />
+              </label>
+            </div>
+            <p class="hint" id="roundStatus" role="status"></p>
+            <div class="row end">
+              <button class="btn primary small" type="button" id="saveRound">Kaydet</button>
+            </div>
+          </div>
+
+          <div class="card admin-card">
+            <h2>Yönetici şifresi</h2>
+            <p class="sub">
+              Bu şifre yalnızca bu tarayıcıda saklanır; siteyi korumak için değil, paneli yanlışlıkla
+              açmamak içindir. İlk şifre: <code>tdk2026</code>
+            </p>
+            <div class="grid-2">
+              <label class="field">
+                <span>Mevcut şifre</span>
+                <input id="passCurrent" type="password" autocomplete="current-password" />
+              </label>
+              <label class="field">
+                <span>Yeni şifre</span>
+                <input id="passNew" type="password" autocomplete="new-password" />
+              </label>
+            </div>
+            <p class="hint" id="passStatus" role="status"></p>
+            <div class="row end">
+              <button class="btn primary small" type="button" id="savePass">Şifreyi değiştir</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sorular -->
+        <div class="tab-panel" id="tab-questions" role="tabpanel" aria-labelledby="tabbtn-questions" hidden>
+          <div class="card admin-card">
+            <h2>Soru bankası</h2>
+            <p class="sub">
+              Sorular JSON olarak düzenlenir. Her soruda <code>category</code>, <code>question</code>,
+              <code>options</code>, <code>answer</code> ve <code>explanation</code> alanları bulunur.
+              <code>answer</code>, seçeneklerden birinin birebir aynısı olmalı.
+            </p>
+
+            <div class="row between" style="margin-bottom: 12px">
+              <span class="status" id="questionStatus" role="status"></span>
+              <span class="badge" id="questionCount">0 soru</span>
+            </div>
+
+            <textarea class="code" id="questionsEditor" spellcheck="false" aria-label="Soru bankası JSON"></textarea>
+
+            <div class="row between" style="margin-top: 14px">
+              <div class="row">
+                <button class="btn primary small" type="button" id="saveQuestions">Kaydet</button>
+                <button class="btn ghost small" type="button" id="addQuestion">Şablon ekle</button>
+              </div>
+              <div class="row">
+                <button class="btn ghost small" type="button" id="exportQuestions">JSON indir</button>
+                <label class="btn ghost small" style="padding: 0 16px; min-height: 40px; cursor: pointer; margin: 0">
+                  JSON yükle
+                  <input type="file" id="importQuestions" accept="application/json,.json" style="display: none" />
+                </label>
+                <button class="btn danger small" type="button" id="resetQuestions">Varsayılanlar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sonuçlar -->
+        <div class="tab-panel" id="tab-results" role="tabpanel" aria-labelledby="tabbtn-results" hidden>
+          <div class="card admin-card">
+            <div class="row between" style="margin-bottom: 14px">
+              <div>
+                <h2>Öğrenci sonuçları</h2>
+                <p class="sub" style="margin-bottom: 0">Bu tarayıcıda kayıtlı turlar.</p>
+              </div>
+              <span class="badge" id="resultCount">0 kayıt</span>
+            </div>
+
+            <div class="table-wrap" id="resultsWrap">
+              <div class="empty">Henüz kayıt yok. Öğrenciler bir tur tamamladığında burada görünür.</div>
+            </div>
+
+            <div class="row between" style="margin-top: 14px">
+              <div class="row">
+                <button class="btn ghost small" type="button" id="refreshResults">Yenile</button>
+                <button class="btn ghost small" type="button" id="pullFirebase">Firebase'den çek</button>
+              </div>
+              <button class="btn danger small" type="button" id="clearResults">Yerel kayıtları sil</button>
+            </div>
+            <p class="hint" id="resultsStatus" role="status"></p>
+          </div>
+        </div>
+
+        <!-- Firebase -->
+        <div class="tab-panel" id="tab-firebase" role="tabpanel" aria-labelledby="tabbtn-firebase" hidden>
+          <div class="card admin-card">
+            <div class="row between" style="margin-bottom: 10px">
+              <h2 style="margin: 0">Firebase bağlantısı</h2>
+              <span class="badge" id="firebaseBadge">Yapılandırılmadı</span>
+            </div>
+            <p class="sub">
+              Firebase web yapılandırmanı yapıştır; sonuçlar Firestore'daki
+              <code>results</code> koleksiyonuna yazılsın. Yapılandırma yokken site localStorage ile
+              çalışmaya devam eder. Adım adım kılavuz:
+              <a href="FIREBASE.md" target="_blank" rel="noopener">FIREBASE.md</a> ·
+              <a href="https://console.firebase.google.com/" target="_blank" rel="noopener">Firebase Konsolu</a>
+            </p>
+
+            <label class="field">
+              <span>Web yapılandırması (JSON)</span>
+              <textarea class="code" id="firebaseEditor" spellcheck="false" style="min-height: 220px" aria-label="Firebase yapılandırması" placeholder='{
+  "apiKey": "...",
+  "authDomain": "proje.firebaseapp.com",
+  "projectId": "proje-id",
+  "storageBucket": "proje.appspot.com",
+  "messagingSenderId": "...",
+  "appId": "..."
+}'></textarea>
+            </label>
+
+            <div class="row between" style="margin-top: 14px">
+              <div class="row">
+                <button class="btn primary small" type="button" id="saveFirebase">Kaydet</button>
+                <button class="btn ghost small" type="button" id="testFirebaseBtn">Bağlantıyı test et</button>
+              </div>
+              <button class="btn danger small" type="button" id="clearFirebase">Bağlantıyı kaldır</button>
+            </div>
+            <p class="hint" id="firebaseStatus" role="status"></p>
+
+            <hr class="divider" />
+            <p class="note warn">
+              Güvenlik notu: Firebase web anahtarı herkese açıktır, gizli değildir. Asıl koruma
+              Firestore güvenlik kurallarıyla sağlanır. Kılavuzdaki kuralları kullanmadan yazma
+              iznini açık bırakma.
+            </p>
+          </div>
+
+          <div class="card admin-card">
+            <h2>Firestore güvenlik kuralları (örnek)</h2>
+            <p class="sub">Konsol → Firestore → Rules bölümüne yapıştırabilirsin.</p>
+            <pre class="code" style="margin: 0; overflow: auto; padding: 16px; border-radius: 16px; background: var(--surface-soft); font-size: 0.8125rem"><code>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /results/{doc} {
+      allow create: if request.resource.data.keys().hasAll(
+        ['name','schoolNo','score','correct','total','percent']
+      );
+      allow read, update, delete: if false;
+    }
+  }
+}</code></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script type="module" src="js/admin.js"></script>
+  </body>
+</html>
