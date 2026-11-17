@@ -49,8 +49,7 @@ service cloud.firestore {
         && request.auth.uid == uid
         && request.resource.data.get('banned', false) == false
         && request.resource.data.name is string
-        && request.resource.data.className is string
-        && request.resource.data.schoolNo is string;
+        && request.resource.data.className is string;
 
       allow update: if (
           request.auth != null
@@ -65,6 +64,13 @@ service cloud.firestore {
         );
 
       allow delete: if false;
+
+      // Okul numarası: yalnızca hesabın sahibi ve yönetici okuyabilir.
+      match /private/{doc} {
+        allow read: if request.auth != null
+          && (request.auth.uid == uid || isAdmin());
+        allow write: if request.auth != null && request.auth.uid == uid;
+      }
     }
 
     match /students/{no} {
@@ -98,20 +104,22 @@ bir tur çöz. Puan `players` koleksiyonunda belirmeli.
 | `uid` | Google hesabının kimliği |
 | `name` | Ad soyad |
 | `className` | Sınıf, örneğin `11-A` |
-| `schoolNo` | Okul numarası |
 | `total` | Toplam puan |
 | `days` | Gün gün puan: `days.YYYY-MM-DD` |
 | `flagged` | `true` ise sıralamada gizlenir (isim filtresi veya yönetici) |
 | `banned` | `true` ise hesap puan kazanamaz ve girişi kapanır |
 
+**players/{uid}/private/info**: Okul numarası (`schoolNo`). Yalnızca hesap sahibi
+ve yönetici okuyabilir; herkese açık sıralamaya girmez.
+
 **results**: Eski tur kayıtları (yönetici paneli için, yalnızca yazılır).
 
 ## 6. Dikkat edilecekler
 
-- Sıralamada ad soyad kısaltılıp gösterilir (Yusuf Ö.), okul numarası gösterilmez.
-  Ama `players` belgeleri herkesin okuyabildiği bir koleksiyondur; veritabanını
-  bilen biri ham veriyi okuyabilir. Bu bilinçli bir karardır ve gizlilik metninde
-  yazılıdır.
+- Sıralamada ad soyad kısaltılıp gösterilir (Yusuf Ö.). Okul numarası herkese
+  açık `players` belgesinde değil, ayrı `private` alt belgesinde tutulur.
+  `players` belgesindeki ad, sınıf ve puan ise veritabanını bilen biri tarafından
+  okunabilir; bu bilinçli bir karardır ve gizlilik metninde yazılıdır.
 - İsim filtresi bir ön filtredir; her küfürü yakalamaz. Yakalanan hesap sıralamada
   gizlenir ve yönetici panelinden açılabilir.
 - Kurallar sunucu tarafında doğrulanır; istemci kodu değiştirilse de banlı hesap

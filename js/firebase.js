@@ -211,12 +211,13 @@ export async function savePlayerProfile(uid, { name, className, schoolNo, nameFl
     const ref = fs.doc(db, "players", uid);
     const snap = await fs.getDoc(ref);
     const previouslyFlagged = snap.exists() && snap.data().flagged === true;
+    // Herkese açık belgede okul numarası yok; eski kayıtlardan da silinir.
     const data = {
       uid,
       name,
       className,
-      schoolNo,
       flagged: previouslyFlagged || !!nameFlagged,
+      schoolNo: fs.deleteField(),
       updatedAt: fs.serverTimestamp(),
     };
     if (!snap.exists()) {
@@ -224,6 +225,12 @@ export async function savePlayerProfile(uid, { name, className, schoolNo, nameFl
     } else {
       await fs.setDoc(ref, data, { merge: true });
     }
+    // Okul numarası yalnızca öğrencinin kendisi ve yönetici tarafından okunabilir.
+    await fs.setDoc(
+      fs.doc(db, "players", uid, "private", "info"),
+      { schoolNo: String(schoolNo), updatedAt: fs.serverTimestamp() },
+      { merge: true }
+    );
     return true;
   } catch (err) {
     console.warn("Profil kaydedilemedi:", err);
@@ -283,7 +290,6 @@ function mapPlayer(d) {
     uid: String(data.uid ?? d.id),
     name: String(data.name ?? ""),
     className: String(data.className ?? ""),
-    schoolNo: String(data.schoolNo ?? ""),
     total: Number(data.total) || 0,
     days: data.days || {},
     banned: data.banned === true,
@@ -312,9 +318,23 @@ export async function fetchPlayerTable(max = 10) {
   return rows.filter((r) => !r.banned && !r.flagged && r.total > 0).slice(0, max);
 }
 
-// Yönetici paneli: bütün hesaplar, bayrakları ile birlikte.
+// Yönetici paneli: bütün hesaplar, bayrakları ve okul numaralarıyla birlikte.
 export async function fetchStudentTable(max = 300) {
-  return queryPlayers(max);
+  const rows = await queryPlayers(max);
+  if (rows === null) return null;
+  const handle = await getDb();
+  if (!handle) return rows;
+  const { fs, db } = handle;
+  return Promise.all(
+    rows.map(async (row) => {
+      try {
+        const snap = await fs.getDoc(fs.doc(db, "players", row.uid, "private", "info"));
+        return { ...row, schoolNo: snap.exists() ? String(snap.data().schoolNo ?? "") : "" };
+      } catch (err) {
+        return { ...row, schoolNo: "" };
+      }
+    })
+  );
 }
 
 // Yönetici: bayrak/yasak güncellemesi. Yalnızca yönetici hesabıyla çalışır.
