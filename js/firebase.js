@@ -212,18 +212,18 @@ export async function savePlayerProfile(uid, { name, className, schoolNo, nameFl
     const snap = await fs.getDoc(ref);
     const previouslyFlagged = snap.exists() && snap.data().flagged === true;
     // Herkese açık belgede okul numarası yok; eski kayıtlardan da silinir.
+    // deleteField yalnızca birleştirmeli yazımda (merge) kullanılabilir.
     const data = {
       uid,
       name,
       className,
       flagged: previouslyFlagged || !!nameFlagged,
-      schoolNo: fs.deleteField(),
       updatedAt: fs.serverTimestamp(),
     };
     if (!snap.exists()) {
       await fs.setDoc(ref, { ...data, banned: false, total: 0, days: {} });
     } else {
-      await fs.setDoc(ref, data, { merge: true });
+      await fs.setDoc(ref, { ...data, schoolNo: fs.deleteField() }, { merge: true });
     }
     // Okul numarası yalnızca öğrencinin kendisi ve yönetici tarafından okunabilir.
     await fs.setDoc(
