@@ -66,6 +66,7 @@
           </p>
         </div>
 
+        <div class="login-row">
         <form class="card login-card" id="loginForm" novalidate>
           <label class="field">
             <span>Ad Soyad</span>
@@ -104,6 +105,18 @@
           <button class="btn primary block" type="submit">Başla</button>
           <p class="hint" id="loginHint" role="status"></p>
         </form>
+
+        <aside class="card board" aria-labelledby="boardTitle">
+          <div class="board-head">
+            <h2 id="boardTitle">Genel sıralama</h2>
+            <span class="chip" id="boardCount"></span>
+          </div>
+          <ol class="board-list" id="boardList">
+            <li class="board-empty">Yükleniyor…</li>
+          </ol>
+          <p class="hint" id="boardStatus" role="status"></p>
+        </aside>
+        </div>
       </section>
 
       <!-- Sınav -->

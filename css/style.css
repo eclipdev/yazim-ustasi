@@ -1104,3 +1104,91 @@ h2 {
 }
 
 .round-totals { margin: 6px 0 0; font-size: 0.9375rem; font-weight: 600; color: var(--accent); }
+
+/* ---------- Giriş + genel sıralama ---------- */
+
+.login-row {
+  display: grid;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (min-width: 860px) {
+  .login-row {
+    grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+  }
+
+  /* Giriş ekranında sayfa biraz geniş; sıralama kartı yanda sığsın */
+  body:has(#view-login:not([hidden])) main {
+    width: min(960px, 100%);
+  }
+}
+
+.board {
+  padding: clamp(22px, 4vw, 32px);
+  display: grid;
+  gap: 14px;
+}
+
+.board-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.board-head h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.board-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.board-list li {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+}
+
+.board-rank {
+  font-weight: 700;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.board-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.board-sub {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.board-pts {
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.board-empty {
+  color: var(--text-2);
+  padding: 10px 4px;
+  background: none !important;
+}

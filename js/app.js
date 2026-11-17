@@ -2,7 +2,7 @@
 
 import { defaultQuestions, defaultSettings } from "./data.js";
 import { store, KEYS } from "./store.js";
-import { saveResultToFirebase } from "./firebase.js";
+import { saveResultToFirebase, fetchStudentTable } from "./firebase.js";
 import { saveRound, localProgress, todayKey } from "./progress.js";
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -409,6 +409,7 @@ function bindEvents() {
   $("#homeBtn").addEventListener("click", () => {
     showView("login");
     fillLogin();
+    loadBoard();
   });
 
   // Görsel katmanına tıklayınca erken kapanır
@@ -433,12 +434,77 @@ function bindEvents() {
 
 // ---------- Başlat ----------
 
+// Ad soyadı kısaltır: "Yusuf Önal" -> "Yusuf Ö."; okul numarası gösterilmez.
+function maskName(name) {
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "Öğrenci";
+  if (parts.length === 1) return parts[0];
+  const last = parts[parts.length - 1];
+  return `${parts[0]} ${last[0].toLocaleUpperCase("tr-TR")}.`;
+}
+
+async function loadBoard() {
+  const list = $("#boardList");
+  const status = $("#boardStatus");
+  const count = $("#boardCount");
+  list.textContent = "";
+  status.textContent = "";
+
+  const rows = await fetchStudentTable(10);
+  if (rows === null) {
+    count.textContent = "";
+    const li = document.createElement("li");
+    li.className = "board-empty";
+    li.textContent = "Sıralama şu an yüklenemedi.";
+    list.append(li);
+    return;
+  }
+
+  const top = rows.filter((r) => r.total > 0).slice(0, 10);
+  count.textContent = top.length ? `İlk ${top.length}` : "";
+
+  if (!top.length) {
+    const li = document.createElement("li");
+    li.className = "board-empty";
+    li.textContent = "Henüz puan yok. İlk turu sen tamamla!";
+    list.append(li);
+    return;
+  }
+
+  const day = todayKey();
+  top.forEach((row, index) => {
+    const li = document.createElement("li");
+
+    const rank = document.createElement("span");
+    rank.className = "board-rank";
+    rank.textContent = String(index + 1);
+
+    const who = document.createElement("div");
+    who.style.minWidth = "0";
+    const name = document.createElement("span");
+    name.className = "board-name";
+    name.textContent = maskName(row.name);
+    const sub = document.createElement("span");
+    sub.className = "board-sub";
+    sub.textContent = `Bugün ${Number(row.days?.[day]?.score) || 0} puan`;
+    who.append(name, sub);
+
+    const pts = document.createElement("span");
+    pts.className = "board-pts";
+    pts.textContent = `${row.total} puan`;
+
+    li.append(rank, who, pts);
+    list.append(li);
+  });
+}
+
 function init() {
   store.set(KEYS.settings, settings);
   applyTheme(store.get(KEYS.theme, "auto"));
   bindEvents();
   fillLogin();
   showView("login");
+  loadBoard();
 }
 
 init();
