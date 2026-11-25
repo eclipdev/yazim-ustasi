@@ -77,6 +77,16 @@ penceresinde açıldıysa ya da masaüstü (Electron) sürümündeyse gizlenir. 
 iPad'de Safari kurulum penceresi açmadığı için düğme "Paylaş → Ana Ekrana Ekle"
 yolunu gösterir. Dar ekranda yalnızca simgesi görünür.
 
+Uygulama kuruluyken site tarayıcı sekmesinde açılırsa (Chrome / Edge), sayfa
+altta "Uygulama bu cihazda kurulu" notunu gösterir ve adres çubuğundaki
+**Uygulamada aç** simgesini hatırlatır. Tarayıcılar güvenlik nedeniyle bir sitenin
+kurulu uygulamayı kendiliğinden açmasına izin vermez; geçişi kullanıcı yapar.
+Manifestteki `handle_links` ve `launch_handler` alanları sayesinde, destekleyen
+Chrome sürümlerinde başka yerden tıklanan site bağlantıları doğrudan uygulamada
+açılabilir (Chrome'un uygulama ayarlarında "Desteklenen bağlantıları aç" açıksa).
+Bu kontrol `related_applications` içindeki GitHub Pages adresine bağlıdır; adres
+değişirse manifestte de güncellenmelidir.
+
 - Kurulduktan sonra site dosyaları önbelleğe alınır; **internet olmadan da**
   tahta oyunu ve sorular açılır. Google girişi, genel sıralama ve Firebase
   bağlantısı doğal olarak internet ister.

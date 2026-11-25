@@ -122,6 +122,43 @@
     hide();
   });
 
+  // Uygulama bu cihazda kuruluysa tarayıcı sekmesindeki ziyaretçiye uygulamaya
+  // geçmeyi hatırlatır. Tarayıcılar sitenin kurulu uygulamayı kendi kendine
+  // açmasına izin vermez; geçişi "Uygulamada aç" simgesiyle kullanıcı yapar.
+  // Destekleyen tarayıcı: Chrome / Edge (manifestteki related_applications).
+  const NOTE_KEY = "dyio.appNoteClosed";
+
+  async function remindInstalledApp() {
+    if (typeof navigator.getInstalledRelatedApps !== "function") return;
+    try {
+      if (sessionStorage.getItem(NOTE_KEY) === "1") return;
+    } catch {
+      /* Depolama kapalı: not yine gösterilir. */
+    }
+    let apps = [];
+    try {
+      apps = await navigator.getInstalledRelatedApps();
+    } catch {
+      return;
+    }
+    if (!apps.some((app) => app.platform === "webapp")) return;
+
+    hide();
+    showHelp(
+      "Uygulama bu cihazda kurulu. Adres çubuğundaki \"Uygulamada aç\" simgesine " +
+        "tıklayarak ya da masaüstündeki kısayoldan uygulamaya geçebilirsin."
+    );
+    help.querySelector("button").addEventListener("click", () => {
+      try {
+        sessionStorage.setItem(NOTE_KEY, "1");
+      } catch {
+        /* yok say */
+      }
+    });
+  }
+
+  window.addEventListener("load", remindInstalledApp);
+
   if (isIos) {
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", show, { once: true });
