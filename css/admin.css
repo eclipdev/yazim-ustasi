@@ -478,3 +478,16 @@ table.results td.num {
   outline-offset: -2px;
   opacity: 0.5;
 }
+
+.leaderboard-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.leaderboard-name img {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  object-fit: cover;
+  border: 1px solid rgba(23, 20, 14, 0.18);
+}

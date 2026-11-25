@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://apis.google.com https://accounts.google.com https://*.googleapis.com https://*.firebaseapp.com https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebaseio.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com; object-src 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>Kişisel çalışma — Doğru Yazarım İyi Oynarım</title>
+    <meta
+      name="description"
+      content="Google hesabınla giriş yap, on soruluk turlarda yazım kurallarını çalış ve puanını sıralamaya yazdır."
+    />
+    <meta name="theme-color" content="#fff6d8" />
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="assets/icons/icon-180.png" />
+    <link rel="stylesheet" href="css/fonts.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/pwa.js" defer></script>
+    <script src="js/theme-boot.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Doğru Yazarım İyi Oynarım ana ekran">
+        <img src="assets/icon.svg" alt="" width="26" height="26" />
+        <span class="brand-name">Doğru Yazarım İyi Oynarım</span>
+      </a>
+      <div class="topbar-actions">
+        <span class="chip strong" id="scoreChip" hidden>0 puan</span>
+        <button
+          class="icon-btn"
+          id="themeToggle"
+          type="button"
+          aria-label="Tema: otomatik. Değiştirmek için dokun."
+          title="Tema"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path
+              d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+        <a class="icon-btn" href="admin.html" aria-label="Yönetici paneli" title="Yönetici paneli">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <circle cx="12" cy="12" r="3.2" />
+            <path
+              d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.34.63 1 1 1.56 1.03H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51.97Z"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </a>
+      </div>
+    </header>
+
+    <main>
+      <!-- Giriş -->
+      <section class="view" id="view-login" aria-labelledby="loginTitle">
+        <a class="linkish back-link" href="./">← Menü</a>
+        <div class="hero">
+          <p class="eyebrow">TDK yazım kılavuzuna göre</p>
+          <h1 class="display" id="loginTitle">Bir <mark>boşluk</mark>,<br />bir puan.</h1>
+          <p class="lead">
+            Google hesabınla giriş yap, sınıfını ve okul numaranı yaz. Her soru için 10 saniyen
+            var. Her doğru cevap 10 puan; puanın hesabında birikir ve sıralamada yerini alır.
+          </p>
+        </div>
+
+        <div class="login-row">
+        <form class="card paper login-card" id="loginForm" novalidate>
+          <button class="btn primary block" id="googleBtn" type="button">Google ile giriş yap</button>
+          <p class="hint" id="authState"></p>
+
+          <fieldset class="profile-fields" id="profileFields" disabled>
+            <label class="field">
+              <span>Ad Soyad</span>
+              <input id="playerName" name="name" type="text" autocomplete="name" required maxlength="60" />
+            </label>
+            <label class="field">
+              <span>Sınıf</span>
+              <input id="playerClass" name="class" type="text" autocomplete="off" required maxlength="12" />
+            </label>
+            <fieldset class="team-pick">
+              <legend>Takımın</legend>
+              <label class="team-opt">
+                <input type="radio" name="team" value="gurbuz" />
+                <img src="assets/team-gurbuz.jpg" alt="" width="44" height="44" />
+                <span>Gürbüz Team</span>
+              </label>
+              <label class="team-opt">
+                <input type="radio" name="team" value="suleyman" />
+                <img src="assets/team-suleyman.jpg" alt="" width="44" height="44" />
+                <span>Süleyman Team</span>
+              </label>
+            </fieldset>
+            <label class="field">
+              <span>Okul numarası</span>
+              <input
+                id="playerNo"
+                name="no"
+                type="text"
+                inputmode="numeric"
+                autocomplete="off"
+                required
+                maxlength="12"
+                pattern="[0-9]*"
+              />
+            </label>
+            <label class="consent">
+              <input type="checkbox" id="consentBox" />
+              <span>
+                Google hesabımın adı ve e-posta adresim ile sınıfım ve okul numaram, yalnızca
+                hesabımı oluşturmak, puanımı kaydetmek ve sıralamayı göstermek için kullanılsın.
+                18 yaşından küçüksem velimin bilgisi vardır.
+                <a href="yasal.html#gizlilik" target="_blank" rel="noopener noreferrer">Gizlilik</a>
+                ·
+                <a href="yasal.html#haklar" target="_blank" rel="noopener noreferrer">Haklarım</a>
+              </span>
+            </label>
+            <button class="btn primary block" type="submit">Yazmaya başla</button>
+          </fieldset>
+
+          <p class="hint" id="loginHint" role="status"></p>
+        </form>
+
+        <aside class="board" aria-labelledby="boardTitle">
+          <div class="board-head">
+            <h2 id="boardTitle">Genel sıralama</h2>
+            <span class="chip" id="boardCount"></span>
+          </div>
+          <ol class="board-list" id="boardList">
+            <li class="board-empty">Yükleniyor…</li>
+          </ol>
+          <p class="hint" id="boardStatus" role="status"></p>
+        </aside>
+        </div>
+      </section>
+
+      <!-- Sınav -->
+      <section class="view" id="view-quiz" aria-labelledby="qText" hidden>
+        <div class="quiz-head">
+          <div class="quiz-meta">
+            <button class="linkish" id="quitBtn" type="button">← Çıkış</button>
+            <span class="counter" id="progressLabel">Soru 1 / 12</span>
+            <span class="timer-pill" id="timerPill"><span id="timerText">10 sn</span></span>
+          </div>
+          <div
+            class="progress"
+            role="progressbar"
+            aria-label="Tur ilerlemesi"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            id="progressBar"
+          >
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="timer-track" aria-hidden="true">
+            <div class="timer-fill" id="timerBar"></div>
+          </div>
+        </div>
+
+        <article class="card paper question-card" id="questionCard">
+          <p class="eyebrow" id="qCategory">Yazım kuralları</p>
+          <h2 class="question" id="qText"></h2>
+          <div class="options" id="qOptions" role="group" aria-label="Seçenekler"></div>
+
+          <div class="explain" id="explain" hidden>
+            <p>
+              <span class="verdict" id="verdict"></span>
+              <span id="explainText"></span>
+            </p>
+            <button class="btn primary block" id="nextBtn" type="button">Sonraki soru</button>
+          </div>
+        </article>
+
+        <p class="quiz-score" id="quizScore">Puan: 0 · Doğru: 0</p>
+      </section>
+
+      <!-- Sonuç -->
+      <section class="view" id="view-result" aria-labelledby="resMsg" hidden>
+        <div class="card paper result-card">
+          <p class="eyebrow">Sayfa tamam</p>
+          <p class="result-score"><span id="resScore">0</span><small>puan</small></p>
+          <p class="lead" id="resMsg"></p>
+          <p class="round-totals" id="resTotals" aria-live="polite"></p>
+
+          <div class="result-grid">
+            <div class="stat">
+              <span class="stat-num" id="resCorrect">0</span>
+              <span class="stat-label">Doğru</span>
+            </div>
+            <div class="stat">
+              <span class="stat-num" id="resWrong">0</span>
+              <span class="stat-label">Yanlış</span>
+            </div>
+            <div class="stat">
+              <span class="stat-num" id="resPct">0%</span>
+              <span class="stat-label">Başarı</span>
+            </div>
+          </div>
+
+          <div class="result-actions">
+            <button class="btn primary" id="againBtn" type="button">Yeni tur</button>
+            <button class="btn ghost" id="homeBtn" type="button">Giriş ekranı</button>
+            <a class="btn ghost" href="./">Menü</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <nav class="legal-nav" aria-label="Yasal bilgiler">
+          <a href="yasal.html#hakkimizda">Hakkımızda</a>
+          <a href="yasal.html#gizlilik">Gizlilik</a>
+          <a href="yasal.html#haklar">Kullanıcı Hakları</a>
+          <a href="yasal.html#kosullar">Kullanım Koşulları</a>
+          <a href="yasal.html#iletisim">İletişim</a>
+        </nav>
+        <p class="eclip-brand"><img class="eclip-mini" src="assets/eclip-logo.webp" alt="" width="22" height="22" />Eclip Software &amp; Entertainment Company</p>
+      </div>
+    </footer>
+
+    <!-- Doğru / yanlış görseli -->
+    <div class="feedback" id="feedback" hidden aria-live="polite">
+      <div class="feedback-scrim" data-dismiss></div>
+      <figure class="feedback-card" id="feedbackCard" data-dismiss>
+        <img id="feedbackImg" alt="" />
+        <figcaption id="feedbackCaption"></figcaption>
+      </figure>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>

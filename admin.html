@@ -8,20 +8,23 @@
       content="default-src 'self'; script-src 'self' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://apis.google.com https://accounts.google.com https://*.googleapis.com https://*.firebaseapp.com https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebaseio.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com; object-src 'none'; base-uri 'self'; form-action 'self'"
     />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <title>Panel — Yazım Ustası</title>
+    <title>Panel — Doğru Yazarım İyi Oynarım</title>
     <meta name="robots" content="noindex" />
     <meta name="theme-color" content="#fff6d8" />
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="assets/icons/icon-180.png" />
     <link rel="stylesheet" href="css/fonts.css" />
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/admin.css" />
+    <script src="js/pwa.js" defer></script>
     <script src="js/theme-boot.js"></script>
   </head>
   <body>
     <header class="topbar">
-      <a class="brand" href="./" aria-label="Yazım Ustası ana ekran">
+      <a class="brand" href="./" aria-label="Doğru Yazarım İyi Oynarım ana ekran">
         <img src="assets/icon.svg" alt="" width="26" height="26" />
-        <span>Yazım Ustası</span>
+        <span class="brand-name">Doğru Yazarım İyi Oynarım</span>
       </a>
       <div class="topbar-actions">
         <a class="icon-btn" href="./" aria-label="Siteye dön" title="Siteye dön">
@@ -60,7 +63,7 @@
         <div class="admin-head">
           <p class="eyebrow">Yönetim</p>
           <h1 class="admin-title">Panel</h1>
-          <p class="lead">Sitenin görsellerini, soru bankasını ve veri bağlantısını buradan ayarla.</p>
+          <p class="lead">Oyunun soru bankasını, ceza destesini, doğru/yanlış görsellerini ve veri bağlantısını buradan ayarla.</p>
         </div>
 
         <nav class="segmented" role="tablist" aria-label="Panel bölümleri">
@@ -76,11 +79,11 @@
           <div class="card admin-card">
             <h2>Doğru ve yanlış görselleri</h2>
             <p class="sub">
-              Öğrenci doğru ya da yanlış yanıtladığında listeden rastgele biri çıkar. Görselleri
+              Oyuncu doğru ya da yanlış yanıtladığında listeden rastgele biri çıkar. Görselleri
               <strong>bağlantı</strong> olarak ekle: GIF ya da görselin doğrudan adresi (sonu .gif,
               .png, .jpg, .webp olan adres). Giphy veya Tenor'da GIF'e sağ tıklayıp "Resim adresini
               kopyala" de. Boyut sınırı yok. Kaydetmek için Oyuncular sekmesinden yönetici Google
-              girişi gerekir; kaydedilen liste bütün öğrencilerde görünür.
+              girişi gerekir; kaydedilen liste bütün cihazlarda görünür.
             </p>
 
             <div class="visual-set">
@@ -116,22 +119,16 @@
           </div>
 
           <div class="card admin-card">
-            <h2>Tur ayarları</h2>
-            <p class="sub">Bir turda kaç soru sorulsun ve her doğru kaç puan getirsin?</p>
-            <div class="grid-2">
-              <label class="field">
-                <span>Tur başına soru</span>
-                <input id="roundSize" type="number" min="1" max="100" step="1" inputmode="numeric" />
-              </label>
-              <label class="field">
-                <span>Doğru başına puan</span>
-                <input id="pointsPerCorrect" type="number" min="1" max="1000" step="1" inputmode="numeric" />
-              </label>
-            </div>
-            <p class="hint" id="roundStatus" role="status"></p>
-            <div class="row end">
-              <button class="btn primary small" type="button" id="saveRound">Kaydet</button>
-            </div>
+            <h2>Oyun kuralları</h2>
+            <p class="sub">
+              Tahta 30 kareden oluşur. Sıradaki karenin rengindeki kart çekilir; doğru cevap
+              oyuncuyu bir kare ilerletir. Yanlış cevapta ceza kartı çekilir: ceza doğru bilinirse
+              oyuncu yerinde kalır, bilemezse bir kare geri gider. 30. kareye ilk ulaşan kazanır.
+            </p>
+            <p class="sub" style="margin-bottom: 0">
+              Kartlar <strong>Sorular</strong>, cezalar <strong>Ceza kartları</strong> sekmesinden
+              düzenlenir. Kural ve kare sayısı sabittir; proje belgesindeki kutu oyunuyla aynıdır.
+            </p>
           </div>
 
           <div class="card admin-card">
@@ -190,6 +187,38 @@
               </div>
             </div>
           </div>
+
+          <div class="card admin-card">
+            <h2>Ceza kartları</h2>
+            <p class="sub">
+              Oyuncu yanlış cevap verdiğinde bu desteden rastgele bir kart çekilir. Cezayı doğru
+              bilirse yerinde kalır, bilemezse bir kare geri gider. Sorularla aynı JSON biçimi
+              kullanılır: <code>category</code>, <code>question</code>, <code>options</code>,
+              <code>answer</code>, <code>explanation</code>.
+            </p>
+
+            <div class="row between" style="margin-bottom: 12px">
+              <span class="status" id="penaltyStatus" role="status"></span>
+              <span class="badge" id="penaltyCount">0 kart</span>
+            </div>
+
+            <textarea class="code" id="penaltiesEditor" spellcheck="false" aria-label="Ceza destesi JSON"></textarea>
+
+            <div class="row between" style="margin-top: 14px">
+              <div class="row">
+                <button class="btn primary small" type="button" id="savePenalties">Kaydet</button>
+                <button class="btn ghost small" type="button" id="addPenalty">Şablon ekle</button>
+              </div>
+              <div class="row">
+                <button class="btn ghost small" type="button" id="exportPenalties">JSON indir</button>
+                <label class="btn ghost small" style="padding: 0 16px; min-height: 40px; cursor: pointer; margin: 0">
+                  JSON yükle
+                  <input type="file" id="importPenalties" accept="application/json,.json" style="display: none" />
+                </label>
+                <button class="btn danger small" type="button" id="resetPenalties">Varsayılanlar</button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Sonuçlar -->
@@ -197,8 +226,22 @@
           <div class="card admin-card">
             <div class="row between" style="margin-bottom: 14px">
               <div>
+                <h2>Kişisel sıralama</h2>
+                <p class="sub" style="margin-bottom: 0">Bu tarayıcıdaki oyunların oyuncu ve takım toplamları, en yüksek puandan sıralı.</p>
+              </div>
+              <span class="badge" id="leaderboardCount">0 satır</span>
+            </div>
+            <div class="table-wrap" id="leaderboardWrap">
+              <div class="empty">Henüz kayıt yok. Bir oyun bittiğinde burada görünür.</div>
+            </div>
+            <p class="hint" id="leaderboardStatus" role="status"></p>
+          </div>
+
+          <div class="card admin-card">
+            <div class="row between" style="margin-bottom: 14px">
+              <div>
                 <h2>Genel puan tablosu</h2>
-                <p class="sub" style="margin-bottom: 0">Firebase'deki öğrenci toplamları, en yüksek puandan sıralı.</p>
+                <p class="sub" style="margin-bottom: 0">Firebase'deki oyuncu toplamları, en yüksek puandan sıralı.</p>
               </div>
               <span class="badge" id="scoreCount">0 öğrenci</span>
             </div>
@@ -214,14 +257,14 @@
           <div class="card admin-card">
             <div class="row between" style="margin-bottom: 14px">
               <div>
-                <h2>Öğrenci sonuçları</h2>
+                <h2>Oyun sonuçları</h2>
                 <p class="sub" style="margin-bottom: 0">Bu tarayıcıda kayıtlı turlar.</p>
               </div>
               <span class="badge" id="resultCount">0 kayıt</span>
             </div>
 
             <div class="table-wrap" id="resultsWrap">
-              <div class="empty">Henüz kayıt yok. Öğrenciler bir tur tamamladığında burada görünür.</div>
+              <div class="empty">Henüz kayıt yok. Bir oyun bittiğinde burada görünür.</div>
             </div>
 
             <div class="row between" style="margin-top: 14px">

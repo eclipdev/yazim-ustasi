@@ -8,23 +8,26 @@
       content="default-src 'self'; script-src 'self' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://apis.google.com https://accounts.google.com https://*.googleapis.com https://*.firebaseapp.com https://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebaseio.com; frame-src https://*.firebaseapp.com https://accounts.google.com https://apis.google.com; object-src 'none'; base-uri 'self'; form-action 'self'"
     />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <title>Yasal Bilgiler — Yazım Ustası</title>
+    <title>Yasal Bilgiler — Doğru Yazarım İyi Oynarım</title>
     <meta
       name="description"
-      content="Yazım Ustası hakkında bilgi, gizlilik politikası, KVKK kapsamındaki kullanıcı hakları, kullanım koşulları ve iletişim."
+      content="Doğru Yazarım İyi Oynarım hakkında bilgi, gizlilik politikası, KVKK kapsamındaki kullanıcı hakları, kullanım koşulları ve iletişim."
     />
     <meta name="theme-color" content="#fff6d8" />
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="assets/icons/icon-180.png" />
     <link rel="stylesheet" href="css/fonts.css" />
     <link rel="stylesheet" href="css/style.css" />
+    <script src="js/pwa.js" defer></script>
     <script src="js/theme-boot.js"></script>
   </head>
   <body>
 
     <header class="topbar">
-      <a class="brand" href="./" aria-label="Yazım Ustası ana ekran">
+      <a class="brand" href="./" aria-label="Doğru Yazarım İyi Oynarım ana ekran">
         <img src="assets/icon.svg" alt="" width="26" height="26" />
-        <span>Yazım Ustası</span>
+        <span class="brand-name">Doğru Yazarım İyi Oynarım</span>
       </a>
       <div class="topbar-actions">
         <a class="icon-btn" href="./" aria-label="Siteye dön" title="Siteye dön">
@@ -36,17 +39,19 @@
     </header>
 
     <main class="legal-main">
-      <p class="eyebrow">Yazım Ustası</p>
+      <p class="eyebrow">Doğru Yazarım İyi Oynarım</p>
       <h1 class="legal-title">Yasal bilgiler</h1>
-      <p class="updated">Son güncelleme: 17 Kasım 2026</p>
+      <p class="updated">Son güncelleme: 24 Kasım 2026</p>
 
       <div class="prose">
         <h2 id="hakkimizda">Hakkımızda</h2>
         <img class="about-logo" src="assets/eclip-logo.webp" alt="Eclip Software &amp; Entertainment Company logosu" width="160" height="160" />
         <p>
-          Yazım Ustası, Türk Dil Kurumu’nun yazım kurallarını kısa sorularla
-          pekiştirmeye yardımcı olmak için hazırlanmış <strong>bir eğitim
-          projesidir</strong>. Türk Dil Kurumu, Millî Eğitim Bakanlığı veya başka bir
+          Doğru Yazarım İyi Oynarım, Türk Dil Kurumu’nun yazım kurallarını kutu
+          oyunuyla pekiştirmeye yardımcı olmak için hazırlanmış <strong>bir eğitim
+          projesidir</strong>. TÜBİTAK 4006 Bilim Fuarı için Selim Nevzat Şahin
+          Anadolu Lisesi öğrencileri tarafından hazırlanan projenin dijital
+          sürümüdür. Türk Dil Kurumu, Millî Eğitim Bakanlığı, TÜBİTAK veya başka bir
           kurumla resmî bir bağlantısı yoktur.
         </p>
         <p>
@@ -57,31 +62,43 @@
 
         <h3 id="eclip">Eclip Software &amp; Entertainment Company</h3>
         <p>
-          Yazım Ustası’nı Eclip Software &amp; Entertainment Company işletir. Eclip,
+          Doğru Yazarım İyi Oynarım’ı Eclip Software &amp; Entertainment Company işletir. Eclip,
           yazılım ve eğlence alanında çalışan bir ekiptir.
         </p>
 
         <h2 id="gizlilik">Gizlilik politikası</h2>
         <p>
-          <strong>Toplanan bilgiler:</strong> Google ile girişte hesabının adı ve e-posta adresi; sınıfın, okul numaran ve adın; bir turun sonunda puan, doğru/yanlış sayısı ve tarih. Amaç hesabını oluşturmak, puanını kaydetmek ve sıralamayı göstermektir.</p>
+          <strong>Toplanan bilgiler:</strong> Oyunda senden yalnızca oyuncu ya da takım
+          adı istenir; okul numarası, e-posta adresi veya hesap bilgisi istenmez. Bir tur
+          bittiğinde oyuncu adı, doğru/yanlış sayısı, puan, tahtadaki konum, ceza sayısı
+          ve tarih kaydedilir. Amaç oyun sonuçlarını göstermek ve öğretmenin ilerlemeyi
+          görebilmesidir.
+        </p>
         <p>
           <strong>Nerede saklanır:</strong> Bilgiler öncelikle kullandığın tarayıcının
-          yerel depolamasında (localStorage) tutulur. Site Firebase’e bağlıysa tur
-          sonuçları ayrıca Google Firebase Firestore’da (proje: tdk26-dd1b2) saklanır. Google hesabının adı ve e-posta adresi, sınıf ve puan bilgisi <code>players</code> belgesinde, okul numaran ise yalnızca sana ve yöneticiye açık ayrı bir kayıtta tutulur. Sıralamada ad soyad kısaltılır ve okul numarası gösterilmez; ancak veritabanı kuralları gereği bu kayıtlar teknik olarak herkes tarafından okunabilir. Yönetici, bir hesabı sıralamadan gizleyebilir veya girişini kapatabilir.
-          Tarayıcı verilerini temizleyerek yerel kayıtları silebilirsin; Firestore
-          kayıtlarının silinmesi için aşağıdaki iletişim kanalını kullanabilirsin.
+          yerel depolamasında (localStorage) tutulur; bu kayıtlar cihazından dışarı
+          çıkmaz. Site yöneticisi Firebase bağlantısını açtıysa tur sonuçları ayrıca
+          Google Firebase Firestore’da (proje: tdk26-dd1b2) <code>results</code>
+          koleksiyonuna yazılır. Bu durumda oyuncu adı ve oyun istatistikleri teknik
+          olarak veritabanına erişebilen kişilerce okunabilir. Panelde önerilen güvenlik
+          kuralları okumayı kapatır; yalnızca yazmaya izin verir. Tarayıcı verilerini
+          temizleyerek yerel kayıtları silebilirsin; Firestore kayıtlarının silinmesi
+          için aşağıdaki iletişim kanalını kullanabilirsin.
         </p>
         <p>
           <strong>Çerezler ve izleme:</strong> Site çerez kullanmaz, reklam göstermez ve
-          üçüncü taraf analitik/izleme aracı çalıştırmaz. Tema, giriş ve ayar tercihleri
-          yalnızca yerel depolamada tutulur.
+          üçüncü taraf analitik/izleme aracı çalıştırmaz. Tema, oyuncu adları ve ayar
+          tercihleri yalnızca yerel depolamada tutulur.
         </p>
         <p>
-          <strong>Hesap ve silme:</strong> Hesabını ve bu hesaba bağlı puan kayıtlarını silmek istersen iletişim adresinden yaz; talebin üzerine kaydını kaldırırız.</p>
+          <strong>Silme:</strong> Yerel kayıtları tarayıcı ayarlarından temizleyebilirsin.
+          Firebase’e yazılmış bir sonucun silinmesini istersen iletişim adresinden yaz;
+          talebin üzerine kaydı kaldırırız.
+        </p>
         <p>
           <strong>18 yaşından küçük kullanıcılar:</strong> Siteyi velinin veya
-          öğretmenin bilgisi dahilinde kullanmalısın. Ad ve okul numarası gibi bilgileri
-          paylaşırken bunu göz önünde bulundur.
+          öğretmenin bilgisi dahilinde kullanmalısın. Oyuncu adı olarak gerçek ad ve
+          soyadını yazmak zorunda değilsin; takma ad da kullanabilirsin.
         </p>
 
         <h2 id="haklar">Kullanıcı hakları (KVKK)</h2>
@@ -115,8 +132,8 @@
 
         <h2 id="cerezler">Çerezler ve yerel depolama</h2>
         <p>
-          Site işlevsel çerez kullanmaz. Tema tercihi, giriş bilgileri, ayarlar ve
-          sonuçlar tarayıcının yerel depolamasında saklanır. Bu veriler tarayıcı
+          Site işlevsel çerez kullanmaz. Tema tercihi, oyuncu adları, yarım kalan oyun
+          ve sonuçlar tarayıcının yerel depolamasında saklanır. Bu veriler tarayıcı
           ayarlarından temizlenebilir.
         </p>
 

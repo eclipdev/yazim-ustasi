@@ -19,6 +19,9 @@ import { TEAMS } from "./teams.js";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 
+// Her soru için cevap süresi (saniye).
+const QUESTION_SECONDS = 10;
+
 const settings = { ...defaultSettings, ...(store.get(KEYS.settings, {}) || {}) };
 
 const state = {
@@ -32,6 +35,8 @@ const state = {
   answered: false,
   feedbackTimer: 0,
   buttons: [],
+  timeLeft: QUESTION_SECONDS,
+  timer: 0,
 };
 
 // ---------- Yardımcılar ----------
@@ -311,6 +316,7 @@ function renderQuestion() {
   state.buttons = buttons;
 
   updateScoreLine();
+  startTimer();
 
   $("#qText").setAttribute("tabindex", "-1");
 }
@@ -331,9 +337,77 @@ function updateScoreLine() {
   $("#quizScore").textContent = `Puan: ${state.score} · Doğru: ${state.correct}`;
 }
 
+// ---------- Süre ----------
+
+function stopTimer() {
+  clearInterval(state.timer);
+  state.timer = 0;
+}
+
+function updateTimerUi() {
+  const left = Math.max(0, state.timeLeft);
+  const text = $("#timerText");
+  const bar = $("#timerBar");
+  const pill = $("#timerPill");
+  if (text) text.textContent = `${left} sn`;
+  if (bar) {
+    // Yeni soruda çubuk anında dolsun; sonraki saniyeler yumuşak azalsın.
+    bar.style.transition = left === QUESTION_SECONDS ? "none" : "";
+    bar.style.width = `${(left / QUESTION_SECONDS) * 100}%`;
+  }
+  if (pill) pill.classList.toggle("low", left <= 3);
+}
+
+function startTimer() {
+  stopTimer();
+  state.timeLeft = QUESTION_SECONDS;
+  updateTimerUi();
+  state.timer = setInterval(() => {
+    state.timeLeft -= 1;
+    updateTimerUi();
+    if (state.timeLeft <= 0) {
+      stopTimer();
+      timeoutQuestion();
+    }
+  }, 1000);
+}
+
+function timeoutQuestion() {
+  if (state.answered) return;
+  const q = state.questions[state.index];
+  if (!q) return;
+
+  state.answered = true;
+
+  for (const b of state.buttons) {
+    b.disabled = true;
+    if (b.dataset.value === q.answer) {
+      b.classList.add("correct");
+      b.querySelector(".mark").textContent = "✓";
+    } else {
+      b.classList.add("dimmed");
+    }
+  }
+
+  updateScoreLine();
+  updateProgress();
+  showFeedback(false);
+
+  const verdict = $("#verdict");
+  verdict.textContent = "Süre doldu. Doğrusu: " + q.answer;
+  verdict.className = "verdict bad";
+  $("#explainText").textContent = q.explanation || "";
+  $("#explain").hidden = false;
+  $("#nextBtn").focus({ preventScroll: true });
+
+  clearTimeout(state.feedbackTimer);
+  state.feedbackTimer = setTimeout(hideFeedback, 2100);
+}
+
 function selectOption(btn, text, q) {
   if (state.answered) return;
   state.answered = true;
+  stopTimer();
 
   const isCorrect = text === q.answer;
   if (isCorrect) {
@@ -441,6 +515,7 @@ function hideFeedback() {
 
 function nextQuestion() {
   if (!state.answered) return;
+  stopTimer();
   hideFeedback();
   state.index += 1;
   if (state.index >= state.questions.length) finishRound();
@@ -448,6 +523,7 @@ function nextQuestion() {
 }
 
 function finishRound() {
+  stopTimer();
   const total = state.questions.length || 0;
   const wrong = Math.max(total - state.correct, 0);
   const pct = total ? Math.round((state.correct / total) * 100) : 0;
@@ -472,6 +548,8 @@ function finishRound() {
     className: state.profile?.className || "-",
     schoolNo: state.profile?.schoolNo || "-",
     uid: state.profile?.uid || "",
+    mode: "kisisel",
+    team: state.profile?.team || "",
     score: state.score,
     correct: state.correct,
     total,
@@ -525,8 +603,13 @@ function maskName(name) {
 async function loadBoard() {
   const list = $("#boardList");
   list.textContent = "";
+  const loading = document.createElement("li");
+  loading.className = "board-empty";
+  loading.textContent = "Yükleniyor…";
+  list.append(loading);
 
   const rows = await fetchPlayerTable(10);
+  list.textContent = "";
   if (rows === null) {
     $("#boardCount").textContent = "";
     const li = document.createElement("li");
@@ -600,6 +683,7 @@ function bindEvents() {
   $("#nextBtn").addEventListener("click", nextQuestion);
 
   $("#quitBtn").addEventListener("click", () => {
+    stopTimer();
     clearTimeout(state.feedbackTimer);
     hideFeedback();
     showView("login");
@@ -608,8 +692,12 @@ function bindEvents() {
     toast("Tur kaydedilmeden kapatıldı.", 1800);
   });
 
-  $("#againBtn").addEventListener("click", startRound);
+  $("#againBtn").addEventListener("click", () => {
+    stopTimer();
+    startRound();
+  });
   $("#homeBtn").addEventListener("click", () => {
+    stopTimer();
     showView("login");
     fillLogin();
     loadBoard();

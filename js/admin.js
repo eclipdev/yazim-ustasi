@@ -1,7 +1,8 @@
-// Yazım Ustası — yönetim paneli
+// Doğru Yazarım İyi Oynarım — yönetim paneli
 
 import {
   defaultQuestions,
+  defaultPenalties,
   defaultSettings,
   defaultAdminPassword,
   defaultAdminPasswordHash,
@@ -367,34 +368,6 @@ function bindVisuals() {
   });
 }
 
-// ---------- Tur ayarları ----------
-
-function bindRound() {
-  $("#roundSize").value = String(settings.roundSize ?? defaultSettings.roundSize);
-  $("#pointsPerCorrect").value = String(
-    settings.pointsPerCorrect ?? defaultSettings.pointsPerCorrect
-  );
-
-  $("#saveRound").addEventListener("click", () => {
-    const roundSize = Number($("#roundSize").value);
-    const points = Number($("#pointsPerCorrect").value);
-
-    if (!Number.isFinite(roundSize) || roundSize < 1 || roundSize > 100) {
-      setStatus($("#roundStatus"), "Tur başına soru 1 ile 100 arasında olmalı.", "err");
-      return;
-    }
-    if (!Number.isFinite(points) || points < 1 || points > 1000) {
-      setStatus($("#roundStatus"), "Puan 1 ile 1000 arasında olmalı.", "err");
-      return;
-    }
-
-    settings = { ...settings, roundSize: Math.round(roundSize), pointsPerCorrect: Math.round(points) };
-    store.set(KEYS.settings, settings);
-    setStatus($("#roundStatus"), "Tur ayarları kaydedildi.", "ok");
-    toast("Tur ayarları kaydedildi.");
-  });
-}
-
 // ---------- Yönetici şifresi ----------
 
 function bindPassword() {
@@ -421,13 +394,13 @@ function bindPassword() {
 
 // ---------- Sorular ----------
 
-function validateBank(value) {
+function validateBank(value, label = "soru") {
   if (!Array.isArray(value)) return { error: "Kök değer bir dizi (array) olmalı." };
-  if (value.length === 0) return { error: "En az bir soru olmalı." };
+  if (value.length === 0) return { error: `En az bir ${label} olmalı.` };
 
   for (let i = 0; i < value.length; i++) {
     const q = value[i];
-    const where = `${i + 1}. soru`;
+    const where = `${i + 1}. ${label}`;
     if (!q || typeof q !== "object") return { error: `${where}: geçersiz kayıt.` };
     if (typeof q.question !== "string" || !q.question.trim())
       return { error: `${where}: "question" boş olamaz.` };
@@ -444,9 +417,9 @@ function validateBank(value) {
   return { questions: value };
 }
 
-function currentBankFromEditor() {
+function currentBankFromEditor(selector = "#questionsEditor") {
   try {
-    return JSON.parse($("#questionsEditor").value);
+    return JSON.parse($(selector).value);
   } catch (err) {
     return null;
   }
@@ -516,7 +489,7 @@ function bindQuestions() {
     if (!Array.isArray(bank)) bank = [...defaultQuestions];
 
     bank.push({
-      category: "Yazımı karıştırılanlar",
+      category: "de / da",
       question: "Doğru yazımı seç.",
       options: ["yanlış yazım", "doğru yazım"],
       answer: "doğru yazım",
@@ -560,6 +533,116 @@ function bindQuestions() {
   });
 }
 
+// ---------- Ceza kartları ----------
+
+function updatePenaltyStatus() {
+  const status = $("#penaltyStatus");
+  const count = $("#penaltyCount");
+  const editor = $("#penaltiesEditor");
+  const raw = editor.value.trim();
+
+  if (!raw) {
+    editor.classList.remove("invalid");
+    setStatus(status, "Ceza destesi boş. Varsayılanlar kullanılacak.", "");
+    count.textContent = "0 kart";
+    return null;
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    editor.classList.add("invalid");
+    setStatus(status, "JSON okunamadı: " + err.message, "err");
+    count.textContent = "—";
+    return null;
+  }
+
+  const result = validateBank(parsed, "kart");
+  if (result.error) {
+    editor.classList.add("invalid");
+    setStatus(status, result.error, "err");
+    count.textContent = "—";
+    return null;
+  }
+
+  editor.classList.remove("invalid");
+  setStatus(status, "JSON geçerli.", "ok");
+  count.textContent = `${parsed.length} kart`;
+  return parsed;
+}
+
+function loadPenaltiesEditor() {
+  const custom = store.get(KEYS.penalties, null);
+  const deck = Array.isArray(custom) && custom.length ? custom : defaultPenalties;
+  $("#penaltiesEditor").value = JSON.stringify(deck, null, 2);
+  updatePenaltyStatus();
+}
+
+function bindPenalties() {
+  loadPenaltiesEditor();
+
+  $("#penaltiesEditor").addEventListener("input", updatePenaltyStatus);
+
+  $("#savePenalties").addEventListener("click", () => {
+    const parsed = updatePenaltyStatus();
+    if (!parsed) {
+      toast("Kaydedilmedi — JSON geçersiz.");
+      return;
+    }
+    store.set(KEYS.penalties, parsed);
+    toast(`Ceza destesi kaydedildi (${parsed.length} kart).`);
+  });
+
+  $("#addPenalty").addEventListener("click", () => {
+    let deck = currentBankFromEditor("#penaltiesEditor");
+    if (!Array.isArray(deck)) deck = [...defaultPenalties];
+
+    deck.push({
+      category: "Ceza",
+      question: "Doğru yazımı seç.",
+      options: ["yanlış yazım", "doğru yazım"],
+      answer: "doğru yazım",
+      explanation: "Kısa kural açıklaması.",
+    });
+
+    $("#penaltiesEditor").value = JSON.stringify(deck, null, 2);
+    updatePenaltyStatus();
+    $("#penaltiesEditor").scrollTop = $("#penaltiesEditor").scrollHeight;
+    toast("Şablon eklendi. Metni düzenleyip kaydet.");
+  });
+
+  $("#exportPenalties").addEventListener("click", () => {
+    const parsed = updatePenaltyStatus();
+    if (!parsed) {
+      toast("Geçerli JSON yok, indirilemedi.");
+      return;
+    }
+    download("ceza-kartlari.json", JSON.stringify(parsed, null, 2));
+  });
+
+  $("#importPenalties").addEventListener("change", (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      $("#penaltiesEditor").value = String(reader.result);
+      const parsed = updatePenaltyStatus();
+      toast(parsed ? "Dosya yüklendi. Kaydetmeyi unutma." : "Dosyadaki JSON geçersiz.");
+    };
+    reader.readAsText(file);
+    event.target.value = "";
+  });
+
+  $("#resetPenalties").addEventListener("click", () => {
+    if (!confirm("Ceza destesi varsayılanlara dönsün mü? Mevcut düzenlemeler kaybolacak.")) return;
+    store.remove(KEYS.penalties);
+    $("#penaltiesEditor").value = JSON.stringify(defaultPenalties, null, 2);
+    updatePenaltyStatus();
+    toast("Ceza destesi varsayılanlara döndü.");
+  });
+}
+
 // ---------- Sonuçlar ----------
 
 function formatDate(iso) {
@@ -594,7 +677,7 @@ function renderTable(list, sourceLabel = "Bu tarayıcı") {
 
   const thead = document.createElement("thead");
   const headRow = document.createElement("tr");
-  ["Tarih", "Ad Soyad", "Okul No", "Puan", "Doğru", "Toplam", "Başarı"].forEach((label) => {
+  ["Tarih", "Oyuncu", "Tür", "Oyun", "Puan", "Doğru", "Toplam", "Başarı"].forEach((label) => {
     const th = document.createElement("th");
     th.scope = "col";
     th.textContent = label;
@@ -610,7 +693,8 @@ function renderTable(list, sourceLabel = "Bu tarayıcı") {
     const cells = [
       formatDate(row.at || row.createdAt?.toDate?.()?.toISOString?.() || null),
       row.name || "—",
-      row.schoolNo || "—",
+      row.mode === "takim" ? "Takım" : row.mode === "kisisel" ? "Kişisel" : "Oyun",
+      row.className || row.schoolNo || "—",
       String(row.score ?? 0),
       String(row.correct ?? 0),
       String(row.total ?? 0),
@@ -619,8 +703,142 @@ function renderTable(list, sourceLabel = "Bu tarayıcı") {
 
     cells.forEach((value, index) => {
       const td = document.createElement("td");
-      if (index >= 3) td.className = "num";
+      if (index >= 4) td.className = "num";
       td.textContent = value;
+      tr.append(td);
+    });
+
+    tbody.append(tr);
+  });
+
+  table.append(tbody);
+  wrap.append(table);
+}
+
+function buildLeaderboard(list) {
+  const map = new Map();
+
+  list.forEach((row) => {
+    const name = String(row.name || "").trim();
+    if (!name) return;
+    const key = name.toLocaleLowerCase("tr-TR");
+    const entry = map.get(key) || {
+      name,
+      games: 0,
+      score: 0,
+      correct: 0,
+      total: 0,
+      wins: 0,
+      teamMode: false,
+      personal: false,
+      boardGame: false,
+    };
+    entry.games += 1;
+    entry.score += Number(row.score) || 0;
+    entry.correct += Number(row.correct) || 0;
+    entry.total += Number(row.total) || 0;
+    if (row.winner) entry.wins += 1;
+    if (row.mode === "takim") entry.teamMode = true;
+    else if (row.mode === "kisisel") entry.personal = true;
+    else entry.boardGame = true;
+    map.set(key, entry);
+  });
+
+  return [...map.values()]
+    .map((entry) => ({
+      ...entry,
+      percent: entry.total ? Math.round((entry.correct / entry.total) * 100) : 0,
+    }))
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        b.percent - a.percent ||
+        a.name.localeCompare(b.name, "tr")
+    );
+}
+
+function teamLogoFor(name) {
+  const key = name.toLocaleLowerCase("tr-TR");
+  const team = Object.values(TEAMS).find(
+    (item) => item.name.toLocaleLowerCase("tr-TR") === key
+  );
+  return team ? team.img : "";
+}
+
+function renderLeaderboard() {
+  const wrap = $("#leaderboardWrap");
+  if (!wrap) return;
+
+  const list = store.get(KEYS.results, []);
+  const rows = buildLeaderboard(Array.isArray(list) ? list : []);
+  const badge = $("#leaderboardCount");
+  if (badge) badge.textContent = `${rows.length} satır`;
+
+  wrap.textContent = "";
+
+  if (!rows.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "Henüz kayıt yok. Bir oyun bittiğinde burada görünür.";
+    wrap.append(empty);
+    return;
+  }
+
+  const table = document.createElement("table");
+  table.className = "results";
+
+  const thead = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  ["Sıra", "Ad", "Tür", "Oyun", "Puan", "Doğru", "Başarı"].forEach((label) => {
+    const th = document.createElement("th");
+    th.scope = "col";
+    th.textContent = label;
+    headRow.append(th);
+  });
+  thead.append(headRow);
+  table.append(thead);
+
+  const tbody = document.createElement("tbody");
+  rows.forEach((row, index) => {
+    const tr = document.createElement("tr");
+
+    const rank = document.createElement("td");
+    rank.className = "num";
+    rank.textContent = String(index + 1);
+    tr.append(rank);
+
+    const name = document.createElement("td");
+    const logo = teamLogoFor(row.name);
+    if (logo) {
+      const wrapName = document.createElement("span");
+      wrapName.className = "leaderboard-name";
+      const img = document.createElement("img");
+      img.src = logo;
+      img.alt = "";
+      img.width = 20;
+      img.height = 20;
+      img.loading = "lazy";
+      wrapName.append(img, document.createTextNode(row.name));
+      name.append(wrapName);
+    } else {
+      name.textContent = row.name;
+    }
+    tr.append(name);
+
+    const kind = document.createElement("td");
+    kind.textContent = row.teamMode
+      ? "Takım"
+      : row.personal && row.boardGame
+        ? "Karışık"
+        : row.personal
+          ? "Kişisel"
+          : "Oyun";
+    tr.append(kind);
+
+    [row.games, row.score, row.correct, `${row.percent}%`].forEach((value) => {
+      const td = document.createElement("td");
+      td.className = "num";
+      td.textContent = String(value);
       tr.append(td);
     });
 
@@ -634,13 +852,14 @@ function renderTable(list, sourceLabel = "Bu tarayıcı") {
 function renderLocalResults() {
   const list = store.get(KEYS.results, []);
   renderTable(Array.isArray(list) ? list : [], "bu tarayıcı");
+  renderLeaderboard();
 }
 
 function renderScoreTable(rows) {
   const wrap = $("#scoreWrap");
   const count = $("#scoreCount");
   wrap.textContent = "";
-  count.textContent = `${rows.length} öğrenci`;
+  count.textContent = `${rows.length} kayıt`;
 
   if (!rows.length) {
     const empty = document.createElement("div");
@@ -655,7 +874,7 @@ function renderScoreTable(rows) {
   table.className = "results";
   const head = document.createElement("thead");
   const headRow = document.createElement("tr");
-  ["Sıra", "Ad Soyad", "Okul no", "Bugün", "Toplam"].forEach((label) => {
+  ["Sıra", "Oyuncu", "Oyun", "Bugün", "Toplam"].forEach((label) => {
     const th = document.createElement("th");
     th.textContent = label;
     headRow.append(th);
@@ -667,7 +886,7 @@ function renderScoreTable(rows) {
   rows.forEach((row, index) => {
     const tr = document.createElement("tr");
     const today = Number(row.days?.[day]?.score) || 0;
-    [index + 1, row.name || "—", row.schoolNo, today, row.total].forEach((value) => {
+    [index + 1, row.name || "—", row.className || row.schoolNo || "—", today, row.total].forEach((value) => {
       const td = document.createElement("td");
       td.textContent = String(value);
       tr.append(td);
@@ -813,9 +1032,9 @@ function bindTheme() {
 
 function hydrate() {
   bindVisuals();
-  bindRound();
   bindPassword();
   bindQuestions();
+  bindPenalties();
   bindResults();
   bindPlayers();
   bindFirebase();

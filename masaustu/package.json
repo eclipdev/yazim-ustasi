@@ -1,0 +1,60 @@
+{
+  "name": "dogru-yazarim-iyi-oynarim",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Doğru Yazarım İyi Oynarım — masaüstü sürümü",
+  "author": "Eclip Software & Entertainment Company",
+  "license": "UNLICENSED",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "com.eclip.dogruyazarimiyioynarim",
+    "productName": "Doğru Yazarım İyi Oynarım",
+    "artifactName": "Dogru-Yazarim-Iyi-Oynarim-${version}.exe",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "server.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "..",
+        "to": "app",
+        "filter": [
+          "index.html",
+          "kisisel.html",
+          "admin.html",
+          "yasal.html",
+          "manifest.webmanifest",
+          "sw.js",
+          "css/**/*",
+          "js/**/*",
+          "assets/**/*",
+          "README.md",
+          "FIREBASE.md"
+        ]
+      }
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
+  }
+}
