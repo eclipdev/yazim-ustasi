@@ -2,7 +2,7 @@
  * Çevrimdışı önbellek. Site Chrome'da "uygulama olarak yükle" ile kurulabilsin
  * ve internetsiz açılabilsin diye. İçerik değişince VERSION değerini artır.
  */
-const VERSION = "v3";
+const VERSION = "v4";
 const CACHE = `dogru-yazarim-${VERSION}`;
 const FILES = [
   "./",
@@ -34,6 +34,8 @@ const FILES = [
   "assets/eclip-logo.webp",
   "assets/default-correct.webp",
   "assets/default-wrong.webp",
+  "assets/qr-yukle.svg",
+  "assets/qr-yukle.png",
   "assets/icons/icon-180.png",
   "assets/icons/icon-192.png",
   "assets/icons/icon-512.png",

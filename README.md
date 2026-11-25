@@ -77,6 +77,19 @@ penceresinde açıldıysa ya da masaüstü (Electron) sürümündeyse gizlenir. 
 iPad'de Safari kurulum penceresi açmadığı için düğme "Paylaş → Ana Ekrana Ekle"
 yolunu gösterir. Dar ekranda yalnızca simgesi görünür.
 
+### Paylaşma ve QR kod
+
+- Üst çubuktaki **Paylaş** düğmesi telefonda sistemin paylaşım menüsünü
+  (WhatsApp vb.) açar; bilgisayarda QR kodlu bir panel açar. Panelden bağlantı
+  kopyalanır ya da QR kodu PNG olarak indirilir (fuar standında basmak için).
+- Paylaşılan adres her zaman `https://eclipdev.github.io/yazim-ustasi/?yukle`
+  olur. Bu bağlantıyla gelen kişi sayfanın başında **kurulum kartı** görür:
+  Chrome / Edge'de tek düğmeyle kurar, iPhone'da "Ana Ekrana Ekle" yolunu görür,
+  Opera / Firefox masaüstünde "Chrome ya da Edge ile aç" uyarısı alır.
+- QR kod dosyaları: `assets/qr-yukle.svg` (sitede) ve `assets/qr-yukle.png`
+  (1024 px, baskı için). Adres değişirse ikisi de yeniden üretilmeli ve
+  `js/pwa.js` içindeki `SITE_URL` güncellenmelidir.
+
 Uygulama kuruluyken site tarayıcı sekmesinde açılırsa (Chrome / Edge), sayfa
 altta "Uygulama bu cihazda kurulu" notunu gösterir ve adres çubuğundaki
 **Uygulamada aç** simgesini hatırlatır. Tarayıcılar güvenlik nedeniyle bir sitenin
