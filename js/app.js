@@ -562,7 +562,9 @@ function finishRound() {
   arr.unshift(result);
   store.set(KEYS.results, arr.slice(0, 300));
 
-  saveResultToFirebase(result).then((saved) => {
+  // Okul numarası yalnızca players/{uid}/private/info içinde tutulur; ortak
+  // sonuç kaydına gitmez. Kural alanı istediği için "-" yazılır.
+  saveResultToFirebase({ ...result, schoolNo: "-" }).then((saved) => {
     if (saved) console.info("Sonuç Firebase'e kaydedildi.");
   });
 

@@ -71,6 +71,12 @@ Site bir web uygulaması (PWA) olarak da kurulabilir. GitHub Pages adresinde
 **Yükle** simgesi gösterir; **Yükle** deyince site masaüstüne ve başlat menüsüne
 kendi simgesiyle eklenir, adres çubuğu olmayan ayrı bir pencerede açılır.
 
+Sayfanın üst çubuğundaki **Uygulamayı yükle** düğmesi aynı kurulum penceresini
+açar. Düğme yalnızca kurulum mümkünken görünür: site zaten kuruluysa, uygulama
+penceresinde açıldıysa ya da masaüstü (Electron) sürümündeyse gizlenir. iPhone ve
+iPad'de Safari kurulum penceresi açmadığı için düğme "Paylaş → Ana Ekrana Ekle"
+yolunu gösterir. Dar ekranda yalnızca simgesi görünür.
+
 - Kurulduktan sonra site dosyaları önbelleğe alınır; **internet olmadan da**
   tahta oyunu ve sorular açılır. Google girişi, genel sıralama ve Firebase
   bağlantısı doğal olarak internet ister.

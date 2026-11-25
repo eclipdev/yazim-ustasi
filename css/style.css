@@ -2071,3 +2071,85 @@ table.results tr.is-winner td {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- Uygulamayı yükle (PWA) ---------- */
+
+.install-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--btn-edge);
+  background: var(--accent);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: background-color 0.2s var(--ease), transform 0.12s var(--ease);
+}
+
+.install-btn[hidden] {
+  display: none;
+}
+
+.install-btn:hover {
+  background: var(--accent-press);
+}
+
+.install-btn:active {
+  transform: translateY(1px);
+}
+
+.install-btn svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.install-help {
+  position: fixed;
+  left: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: max-content;
+  max-width: min(440px, calc(100vw - 32px));
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  background: var(--surface-solid);
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-soft);
+  font-size: 0.9375rem;
+}
+
+.install-help p {
+  margin: 0;
+}
+
+/* Dar ekranda yalnızca simge görünür */
+@media (max-width: 520px) {
+  .install-btn {
+    width: 38px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .install-btn span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}

@@ -2,7 +2,7 @@
  * Çevrimdışı önbellek. Site Chrome'da "uygulama olarak yükle" ile kurulabilsin
  * ve internetsiz açılabilsin diye. İçerik değişince VERSION değerini artır.
  */
-const VERSION = "v1";
+const VERSION = "v2";
 const CACHE = `dogru-yazarim-${VERSION}`;
 const FILES = [
   "./",

@@ -189,7 +189,7 @@ function bindGate() {
       const locked = lockSecondsLeft();
       hint.textContent = locked
         ? `Çok fazla yanlış deneme. ${locked} saniye sonra tekrar dene.`
-        : "Şifre yanlış. İlk şifre: kaptan";
+        : "Şifre yanlış.";
       hint.classList.add("error");
       input.setAttribute("aria-invalid", "true");
       input.select();
